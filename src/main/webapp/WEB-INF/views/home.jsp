@@ -241,7 +241,7 @@
 
             $.ajax({
                 type: 'post',
-                url: './webocr/uploadimg.action',
+                url: './uploadimg.action',
                 data: formData,
                 success: function(status) {
                     if (status != 'error') {

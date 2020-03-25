@@ -1,8 +1,11 @@
 package com.poseungcar.webocr.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
@@ -15,13 +18,14 @@ import org.springframework.web.servlet.view.JstlView;
 @ComponentScan(basePackages = { "com.poseungcar.webocr","com.poseungcar.webocr.controller" })
 @PropertySource({"classpath:profiles/${spring.profiles.active}/application.properties"})
 public class ServletConfig implements WebMvcConfigurer {
-	@Value("${uploads.location}")
-	private String uploadsLocation;
-	@Value("${uploads.uri_path}")
-	private String uploadsUriPath;
+	@Value("${imgs.location}")
+	private String imgsLocation;
+	@Value("${imgs.uri_path}")
+	private String imgsUriPath;
 
 
-	//private final int MAX_SIZE = 10 * 1024 * 1024;
+	private final int MAX_SIZE = 20 * 1024 * 1024;
+
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
 		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
@@ -35,18 +39,18 @@ public class ServletConfig implements WebMvcConfigurer {
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		//mapping="/resources/**" locations=/resources/
 		registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
-		registry.addResourceHandler(uploadsUriPath+"/**").addResourceLocations("file://"+uploadsLocation);
+		registry.addResourceHandler(imgsUriPath+"/**").addResourceLocations("file://"+imgsLocation);
 
 	}
 
-//	@Bean
-//	public MultipartResolver multipartResolver() {
-//		CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-//		multipartResolver.setMaxUploadSize(MAX_SIZE); // 10MB
-//		multipartResolver.setMaxUploadSizePerFile(MAX_SIZE); // 10MB
-//		multipartResolver.setMaxInMemorySize(0);
-//		return multipartResolver;
-//	}
+	   @Bean
+	   public MultipartResolver multipartResolver() {
+	      CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+	      multipartResolver.setMaxUploadSize(MAX_SIZE); // 10MB
+	      multipartResolver.setMaxUploadSizePerFile(MAX_SIZE); // 10MB
+	      multipartResolver.setMaxInMemorySize(0);
+	      return multipartResolver;
+	   }
 
 
 

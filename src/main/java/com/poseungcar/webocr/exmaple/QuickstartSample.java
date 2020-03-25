@@ -24,10 +24,10 @@ import org.springframework.context.annotation.PropertySource;
 
 
 public class QuickstartSample {
-	@Value("${uploads.location}")
-	private String uploadsLocation;
-	@Value("${uploads.uri_path}")
-	private String uploadsUriPath;
+	@Value("${imgs.location}")
+	private String imgsLocation;
+	@Value("${imgs.uri_path}")
+	private String imgsUriPath;
 	
 
 	public static void main(String... args) throws Exception {

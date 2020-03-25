@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.poseungcar.webocr.DAO.OcrDAO">
+
+
+
+<select id="select" resultType="com.poseungcar.webocr.DTO.OCR">
+    SELECT *
+    FROM OCR
+    <trim prefix="WHERE" prefixOverrides="AND|OR">
+      <if test="ocr_no != null">AND ocr_no=#{ocr_no}</if>
+      <if test="usr_id != null">AND usr_id=#{usr_id}</if>
+      <if test="ocr_fileName != null">AND ocr_fileName=#{ocr_fileName}</if>
+      <if test="ocr_filePath != null">AND ocr_filePath=#{ocr_filePath}</if>
+      <if test="ocr_datetime != null">AND ocr_datetime=#{ocr_datetime}</if>
+      <if test="ocr_ocrResult != null">AND ocr_ocrResult=#{ocr_ocrResult}</if>
+      <if test="ocr_hash != null">AND ocr_hash=#{ocr_hash}</if>
+    </trim>
+
+  </select>
+
+  <update id="update" parameterType="com.poseungcar.webocr.DTO.OCR">
+    UPDATE OCR
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="usr_id != null"> usr_id=#{usr_id},</if>
+      <if test="ocr_fileName != null"> ocr_fileName=#{ocr_fileName},</if>
+      <if test="ocr_filePath != null"> ocr_filePath=#{ocr_filePath},</if>
+      <if test="ocr_datetime != null"> ocr_datetime=#{ocr_datetime},</if>
+      <if test="ocr_ocrResult != null"> ocr_ocrResult=#{ocr_ocrResult},</if>
+      <if test="ocr_hash != null"> ocr_hash=#{ocr_hash},</if>
+    </trim>
+
+    WHERE no=#{no}
+  </update>
+
+  <insert id="insert" useGeneratedKeys="true" keyProperty="ocr_no" parameterType="com.poseungcar.webocr.DTO.OCR">
+    INSERT INTO OCR(usr_id, ocr_fileName, ocr_filePath, ocr_datetime, ocr_ocrResult, ocr_hash)
+    VALUES(#{usr_id}, #{ocr_fileName}, #{ocr_filePath}, #{ocr_datetime}, #{ocr_ocrResult}, #{ocr_hash} )
+  </insert>
+
+</mapper>

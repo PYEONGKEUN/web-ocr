@@ -1,4 +1,4 @@
-package com.poseungcar.webocr;
+package com.poseungcar.webocr.mybatis;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -20,17 +20,18 @@ import com.poseungcar.webocr.config.RootConfig;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes= {RootConfig.class})
-public class DBConnectionTest {
+public class MyBatisTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(DBConnectionTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(MyBatisTest.class);
 	
 	@Inject
 	private DataSource ds;
 
 
 	// sql 동작은 모두 로그에 기록되기때문에 하지 않아도 됨   
+	// DB 서버 연결부터 Ibatis 매핑 테스트
 	@Test
-	public void testConnection() throws Exception {
+	public void test() throws Exception {
 
 		try (Connection con = ds.getConnection()) {
 			System.out.println(con);

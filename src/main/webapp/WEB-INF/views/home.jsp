@@ -56,6 +56,17 @@
         #selectedImgs {
             display: none;
         }
+
+        #myBar {
+            width: 0%;
+            height: 40px;
+            background-color: #277daa;
+            text-align: center;
+            /* To center it horizontally (if you want) */
+            line-height: 30px;
+            /* To center it vertically */
+            color: white;
+        }
     </style>
 
 
@@ -88,6 +99,9 @@
                         <div class="col">
                             <button type="button" class="btn btn-primary" onclick="sendImgs()">작업시작</button>
                             <button id="downExcel" type="button" class="btn btn-primary">작업결과 다운</button>
+                            <button type="button" class="btn btn-danger" onclick="resetFiles()">목록 초기화</button>
+
+
                         </div>
                     </div>
 
@@ -115,13 +129,65 @@
 
 
     <script>
-        // 버튼 이벤트 등록
+        var isFinished = false;
+        var isProgress = false;
+        var hasDownoad = false;
+        var remainTask = 0;
+
+
+
+
+        class Queue {
+            constructor() {
+                this._arr = [];
+            }
+            enqueue(item) {
+                this._arr.push(item);
+            }
+            dequeue() {
+                return this._arr.shift();
+            }
+            hasData() {
+                if (this._arr.length > 0) return true;
+                else return false;
+            }
+        }
+
+        var finishQueue = new Queue();
+
+        var intervalId = null;
+        var checkProcess = function() {
+            console.info(remainTask);
+            if (remainTask == 0) {
+                clearInterval(intervalId);
+                isProgress = false;
+                hasDownoad = true;
+                isFinished = true;
+                alert("모든 작업이 완료 되었습니다.");
+            } else {
+                if (finishQueue.hasData()) {
+                    remainTask -= finishQueue.dequeue();
+
+                }
+
+
+            }
+
+        }
+
+
+
+        // 이벤트 등록
         $(document).ready(function() {
             // 파일추가 버튼 이벤트
             $('#btnSelectedImgs').click(function(e) {
+                if (isProgress) {
+                    alert("이미 작업중 입니다. 작업이 모두 끝나면 시도해주세요.");
+                    return null;
+                }
+
                 $('#selectedImgs').click();
             });
-
 
         });
 
@@ -130,22 +196,40 @@
         //엑셀 다운
         $("#downExcel").click(
             function() {
-                fnExcelReport("totalTable", "엑셀");
+                fnExcelReport("totalTable", "web-cor-작업결과");
             }
 
         );
         var FILE_LIST = new Array();
 
 
+        function resetFiles() {
+            if (hasDownoad) {
+                alert("아직 작업 결과를 한 번도 다운로드하지 않았습니다.");
+                return null;
+            }
+            if (isProgress) {
+                alert("작업중에는 목록을 초기화 할수 없습니다.");
+                return null;
+            }
+            FILE_LIST.splice(0, FILE_LIST.length);
+            var tbody = document.getElementById("dataTable");
+            while (tbody.hasChildNodes()) {
+                tbody.removeChild(tbody.firstChild);
+            }
+            isFinished = false;
+            isProgress = false;
+        }
+
 
         function onChangeSelectedImgs() {
             //function() {
-            console.log("img in changed");
+            //console.log("img in changed");
             var files = document.getElementById("selectedImgs").files;
             var fileLen = files.length;
-            console.log(files);
+            //console.log(files);
             var dataTable = document.getElementById('dataTable');
-            console.log(dataTable);
+            //console.log(dataTable);
             //}
             // 파일을 읽고 dataTable에 정보 추가
             function readAndAdd(file) {
@@ -154,7 +238,7 @@
 
                 // `file.name` 형태의 확장자 규칙에 주의하세요
                 if (/\.(jpe?g|png|gif)$/i.test(file.name)) {
-                    console.log(FILE_LIST);
+                    //console.log(FILE_LIST);
                     FILE_LIST.push(file);
 
                     var reader = new FileReader();
@@ -167,12 +251,12 @@
                         tmpRow.appendChild(tmpCell1);
 
                         var tmpCell2 = document.createElement("td");
-//                        var img = new Image();
-//                        img.src = this.result;
-//                        img.className = "thubnail";
+                        //                        var img = new Image();
+                        //                        img.src = this.result;
+                        //                        img.className = "thubnail";
 
                         var tmpCellText2 = document.createTextNode("");
-                        tmpCell2.appendChild(tmpCellText2);                        
+                        tmpCell2.appendChild(tmpCellText2);
                         tmpCell2.appendChild(tmpCellText2);
                         tmpRow.appendChild(tmpCell2);
 
@@ -180,26 +264,26 @@
                         var tmpCellText3 = document.createTextNode("");
                         tmpCell3.appendChild(tmpCellText3);
                         tmpRow.appendChild(tmpCell3);
-                        
-                        
+
+
                         var tmpCell4 = document.createElement("td");
                         var buttonDel = document.createElement("button");
                         buttonDel.innerHTML = "삭제";
                         buttonDel.type = "button";
-                        buttonDel.className = "btn btn-primary";
+                        buttonDel.className = "btn btn-warning";
                         buttonDel.onclick = function() {
                             var tbody = document.getElementById("dataTable");
                             tbody.removeChild(this.parentElement.parentElement);
                             //행당행의 데이터 삭제
                             FILE_LIST.splice(this.parentElement.rowIndex, 1);
-                            console.info("행삭제, 파일삭제");
-                            console.info(FILE_LIST);
+                            //console.info("행삭제, 파일삭제");
+                            //console.info(FILE_LIST);
                         };
                         tmpCell4.appendChild(buttonDel);
                         tmpRow.appendChild(tmpCell4);
 
                         dataTable.appendChild(tmpRow);
-                        console.log(tmpRow);
+                        //console.log(tmpRow);
                     }, false);
                     reader.readAsDataURL(file);
 
@@ -210,22 +294,53 @@
             // files 가 false가 아니라면 
             if (files) {
                 [].forEach.call(files, readAndAdd);
-                alert("파일 " + files.length + "개가 추가 되었습니다.");
+                alert("파일 " + files.length + "개가 추가되었습니다.");
             }
             document.getElementById("selectedImgs").value = null;
         }
 
         function sendImgs() {
-            var len = FILE_LIST.length;
 
-            for (var i = 0; i < len; i++) {
-                console.info(FILE_LIST[i]);
-                sendFile(FILE_LIST[i], i + 1);
+
+
+            if (isFinished) {
+                alert("작업이 모두 끝났습니다. 파일 목록을 초기화한 뒤 다시 시도해주세요.");
+                return null;
             }
+
+            if (isProgress) {
+                alert("이미 작업중 입니다. 작업이 모두 끝나면 시도해주세요.");
+                return null;
+            }
+
+
+            var len = FILE_LIST.length;
+            if (len == 0) {
+                alert("파일을 추가해 주세요");
+                return null;
+            }
+
+
+
+            isProgress = true;
+            remainTask = len;
+            for (var i = 0; i < len; i++) {
+                //console.info(FILE_LIST[i]);
+                sendFile(FILE_LIST[i], i + 1);
+
+            }
+            alert("작업을 시작했습니다.");
+
+
+            intervalId = setInterval(checkProcess, 1000);
+
+
+
 
         }
 
-        
+
+
 
 
         //이미지 업로드 AJAX
@@ -234,12 +349,12 @@
 
 
 
-            console.info("sendFile");
+            //console.info("sendFile");
             var formData = new FormData();
             formData.append('mediaFile', file);
 
             for (var pair of formData.entries()) {
-                console.log(pair[0] + ', ' + pair[1]);
+                //console.log(pair[0] + ', ' + pair[1]);
             }
 
             $.ajax({
@@ -250,10 +365,10 @@
                     if (status != 'error') {
                         // 요청 결과로 td 변경
                         //읽어온 번호 열
-                        console.info(status);
+                        //console.info(status);
                         var tdReadNum = getTd(idx, 2);
 
-                        console.info("td is" + tdReadNum);
+                        //console.info("td is" + tdReadNum);
                         if (tdReadNum.hasChildNodes) {
                             tdReadNum.removeChild(tdReadNum.firstChild);
                         }
@@ -261,26 +376,31 @@
                         var tmpCellText1 = document.createTextNode(status);
 
                         tdReadNum.appendChild(tmpCellText1);
-                        
-                        // 삭제 버튼 열
-                        var tdDel= getTd(idx, 4);
 
-                        console.info("td is" + tdReadNum);
+                        // 삭제 버튼 열
+                        var tdDel = getTd(idx, 4);
+
+                        //console.info("td is" + tdReadNum);
                         if (tdDel.hasChildNodes) {
                             tdDel.removeChild(tdDel.firstChild);
                         }
-                        var tmpCellTex2 = document.createTextNode("작업완료");
+                        var tmpCellTex2 = document.createTextNode("작업 완료");
                         tdDel.appendChild(tmpCellTex2);
-                        
-                        
+
+
 
                         // 파일명 변경 열
                         var tdChangedName = getTd(idx, 3);
                         var fileType = getTd(idx, 1).innerHTML.split(".")[1];
-                        var fileName = getTd(idx, 2).innerHTML  +"."+ fileType;
+                        var fileName = getTd(idx, 2).innerHTML + "." + fileType;
 
                         var tmpCellTex3 = document.createTextNode(fileName);
                         tdChangedName.appendChild(tmpCellTex3);
+
+                        finishQueue.enqueue(1);
+
+
+
                     }
                 },
                 processData: false,
@@ -304,12 +424,19 @@
                 selectedTd = document.querySelector("#dataTable > tr:nth-child(" + rowIdx + ") > td:nth-child(" + cellIdx + ")");
             }
             return selectedTd;
-        } 
-        
-        
-        
-        
+        }
+
+
+
+
         function fnExcelReport(id, title) {
+
+            if (!isFinished) {
+                alert("작업 후에 다운로드해 주세요.");
+                return null;
+            }
+            hasDownoad = false;
+
             // 엑셀 다운로드
             var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
             tab_text = tab_text + '<head><meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">';
@@ -321,17 +448,17 @@
             var exportTable = $('#' + id).clone();
 
             //열 삭제
-            console.info(exportTable);
+            //console.info(exportTable);
 
             var thd_tr = exportTable[0].rows;
-            console.info(thd_tr);
+            //console.info(thd_tr);
 
             var thd_tr_len = thd_tr.length;
             var thd_td;
             for (var i = 0; i < thd_tr_len; i++) {
 
                 thd_td = thd_tr[i].cells;
-                console.info(thd_td);
+                //console.info(thd_td);
                 //document.getElementById('msg').innerHTML = thd_td.length;
                 if (thd_td.length > 2) {
                     thd_tr[i].deleteCell(thd_td.length - 1);
@@ -375,24 +502,26 @@
             var len = FILE_LIST.length;
 
             for (var i = 0; i < len; i++) {
-                console.info(FILE_LIST[i]);
+                //console.info(FILE_LIST[i]);
 
                 var imgName = getTd(i + 1, 3).innerHTML;
-               
-                
+
+
                 var elem = window.document.createElement('a');
                 elem.href = window.URL.createObjectURL(FILE_LIST[i]);
                 elem.download = imgName;
                 document.body.appendChild(elem);
                 elem.click();
                 document.body.removeChild(elem);
-                
+
             }
-            
-            
+
+
 
         }
     </script>
 
 
-</body></html>
+</body>
+
+</html>

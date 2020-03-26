@@ -9,6 +9,6 @@ import javax.servlet.http.HttpSession;
 public interface OcrService {
 
 	
-	public Map<String, Object> detectText(String id, String fileName,String filePath)  throws FileNotFoundException, IOException;
+	public boolean detectText(String id, String fileName,String filePath,String fileHash)  throws FileNotFoundException, IOException;
 	public String getVoucherNum(String id, String fileName,String filePath);
 }

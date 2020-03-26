@@ -50,7 +50,8 @@ public class UploadController {
 		ocrService.detectText(
 				"default", 
 				uploadResult.get("fileName").toString(), 
-				uploadResult.get("filePath").toString());
+				uploadResult.get("filePath").toString(),
+				uploadResult.get("fileHash").toString());
 
 		String result = ocrService.getVoucherNum(
 				"default", 

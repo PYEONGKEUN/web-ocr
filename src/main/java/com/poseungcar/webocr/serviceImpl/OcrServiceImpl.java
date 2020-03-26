@@ -53,14 +53,41 @@ public class OcrServiceImpl implements OcrService {
 
 
 	@Override
-	public Map<String, Object> detectText(String id, String fileName,String filePath) throws FileNotFoundException, IOException{
+	public boolean detectText(String id, String fileName,String filePath,String fileHash) throws FileNotFoundException, IOException{
 		// TODO Auto-generated method stub
-		logger.info("---detectText Start---");
-		// 결과물을 받을 변수
-		Map<String,Object> result = new HashMap<String, Object>();
+		logger.info("---detectText Start---");		
+
+		// 같은 해시값을 가진 파일을 찾음
+		OCR findOCR =OCR.builder()
+				.ocr_hash(fileHash)
+				.build(); 
+		
+		List<OCR> findedocrs = ocrDao.select(findOCR);
+		if(findedocrs.size() == 1) {
+			
+			
+			OCR ocr = OCR.builder()
+					.usr_id(id)
+					.ocr_datetime(TimeLib.getCurrDateTime())
+					.ocr_fileName(fileName)
+					.ocr_filePath(filePath)
+					.ocr_ocrResult(findedocrs.get(0).getOcr_ocrResult().toString())
+					.ocr_hash(fileHash)
+					.build();
+
+			//logger.debug(ocr.toString());
+
+			ocrDao.insert(ocr);
+			
+			return true;
+		}
+		
+		
+		
+
 
 		List<AnnotateImageRequest> requests = new ArrayList<>();
-		//		try {
+
 		ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
 
 		Image img = Image.newBuilder().setContent(imgBytes).build();			
@@ -73,15 +100,11 @@ public class OcrServiceImpl implements OcrService {
 			BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
 			List<AnnotateImageResponse> responses = response.getResponsesList();
 
-
-
-
-
 			for (AnnotateImageResponse res : responses) {
 				if (res.hasError()) {
 
 					logger.error("Error: %s\n", res.getError().getMessage());
-					return null;
+					return false;
 				}
 
 				Gson gson = new Gson();
@@ -95,6 +118,7 @@ public class OcrServiceImpl implements OcrService {
 						.ocr_fileName(fileName)
 						.ocr_filePath(filePath)
 						.ocr_ocrResult(json)
+						.ocr_hash(fileHash)
 						.build();
 
 				//logger.debug(ocr.toString());
@@ -110,7 +134,7 @@ public class OcrServiceImpl implements OcrService {
 		//			
 		//logger.info(result.toString());
 		logger.info("---detectText End---");
-		return result;
+		return true;
 	}
 
 

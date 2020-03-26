@@ -23,6 +23,7 @@ import com.poseungcar.webocr.DAO.OcrDAO;
 import com.poseungcar.webocr.DTO.OCR;
 import com.poseungcar.webocr.service.IFileService;
 import com.poseungcar.webocr.service.OcrService;
+import com.poseungcar.webocr.util.FileHash;
 
 
 @Service
@@ -49,7 +50,7 @@ public class FileService implements IFileService{
 			Model model, 
 			HttpSession session,
 			HttpServletRequest request,
-			HttpServletResponse response) throws IOException{
+			HttpServletResponse response) throws IllegalStateException, IOException{
 		// TODO Auto-generated method stub
 
 		
@@ -102,6 +103,7 @@ public class FileService implements IFileService{
 
 			result.put("fileName", file.getOriginalFilename());
 			result.put("filePath", saveFile.getPath());
+			result.put("fileHash", FileHash.sha(saveFile.getPath()));
 			return result;
 			
 		} else {

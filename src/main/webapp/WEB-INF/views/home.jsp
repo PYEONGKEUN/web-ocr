@@ -6,7 +6,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>WEB OCR</title>
+    <title>web-ocr</title>
     <!--bootstrap-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -167,19 +167,21 @@
                         tmpRow.appendChild(tmpCell1);
 
                         var tmpCell2 = document.createElement("td");
-                        var img = new Image();
-                        img.src = this.result;
-                        img.className = "thubnail";
-                        //var tmpCellText2 = document.createTextNode(this.result);
-                        //tmpCell2.appendChild(tmpCellText2);
-                        tmpCell2.appendChild(img);
+//                        var img = new Image();
+//                        img.src = this.result;
+//                        img.className = "thubnail";
+
+                        var tmpCellText2 = document.createTextNode("");
+                        tmpCell2.appendChild(tmpCellText2);                        
+                        tmpCell2.appendChild(tmpCellText2);
                         tmpRow.appendChild(tmpCell2);
 
                         var tmpCell3 = document.createElement("td");
                         var tmpCellText3 = document.createTextNode("");
                         tmpCell3.appendChild(tmpCellText3);
                         tmpRow.appendChild(tmpCell3);
-
+                        
+                        
                         var tmpCell4 = document.createElement("td");
                         var buttonDel = document.createElement("button");
                         buttonDel.innerHTML = "삭제";
@@ -213,7 +215,6 @@
             document.getElementById("selectedImgs").value = null;
         }
 
-
         function sendImgs() {
             var len = FILE_LIST.length;
 
@@ -221,8 +222,10 @@
                 console.info(FILE_LIST[i]);
                 sendFile(FILE_LIST[i], i + 1);
             }
+
         }
 
+        
 
 
         //이미지 업로드 AJAX
@@ -246,31 +249,38 @@
                 success: function(status) {
                     if (status != 'error') {
                         // 요청 결과로 td 변경
+                        //읽어온 번호 열
                         console.info(status);
-                        var tdReadNum;
-                        console.info("start----- change td");
-                        console.info("#dataTable > tr > td:nth-child(2)");
-                        console.info(document.querySelector("#dataTable > tr > td:nth-child(2)"));
-                        console.info("#dataTable > tr:nth-child(" + idx + ") > td:nth-child(2)");
-                        console.info(document.querySelector("#dataTable > tr:nth-child(" + idx + ") > td:nth-child(2)"));
-
-
-                        if (idx == 1) {
-                            if ((tdReadNum = document.querySelector("#dataTable > tr:nth-child(1) > td:nth-child(2)")) == null) {
-                                tdReadNum = document.querySelector("#dataTable > tr > td:nth-child(2)");
-                            }
-                        } else {
-                            tdReadNum = document.querySelector("#dataTable > tr:nth-child(" + idx + ") > td:nth-child(2)");
-                        }
+                        var tdReadNum = getTd(idx, 2);
 
                         console.info("td is" + tdReadNum);
                         if (tdReadNum.hasChildNodes) {
                             tdReadNum.removeChild(tdReadNum.firstChild);
                         }
 
-                        var tmpCellText = document.createTextNode(status);
+                        var tmpCellText1 = document.createTextNode(status);
 
-                        tdReadNum.appendChild(tmpCellText);
+                        tdReadNum.appendChild(tmpCellText1);
+                        
+                        // 삭제 버튼 열
+                        var tdDel= getTd(idx, 4);
+
+                        console.info("td is" + tdReadNum);
+                        if (tdDel.hasChildNodes) {
+                            tdDel.removeChild(tdDel.firstChild);
+                        }
+                        var tmpCellTex2 = document.createTextNode("작업완료");
+                        tdDel.appendChild(tmpCellTex2);
+                        
+                        
+
+                        // 파일명 변경 열
+                        var tdChangedName = getTd(idx, 3);
+                        var fileType = getTd(idx, 1).innerHTML.split(".")[1];
+                        var fileName = getTd(idx, 2).innerHTML  +"."+ fileType;
+
+                        var tmpCellTex3 = document.createTextNode(fileName);
+                        tdChangedName.appendChild(tmpCellTex3);
                     }
                 },
                 processData: false,
@@ -280,11 +290,27 @@
                     //console.log(jqXHR.responseText);
                 }
             });
+
         }
 
+        function getTd(rowIdx, cellIdx) {
 
-
+            var selectedTd;
+            if (rowIdx == 1) {
+                if ((selectedTd = document.querySelector("#dataTable > tr:nth-child(1) > td:nth-child(" + cellIdx + ")")) == null) {
+                    selectedTd = document.querySelector("#dataTable > tr > td:nth-child(" + cellIdx + ")");
+                }
+            } else {
+                selectedTd = document.querySelector("#dataTable > tr:nth-child(" + rowIdx + ") > td:nth-child(" + cellIdx + ")");
+            }
+            return selectedTd;
+        } 
+        
+        
+        
+        
         function fnExcelReport(id, title) {
+            // 엑셀 다운로드
             var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
             tab_text = tab_text + '<head><meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">';
             tab_text = tab_text + '<xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>'
@@ -293,13 +319,9 @@
             tab_text = tab_text + '</x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body>';
             tab_text = tab_text + "<table border='1px'>";
             var exportTable = $('#' + id).clone();
-            
-            
 
             //열 삭제
             console.info(exportTable);
-
-
 
             var thd_tr = exportTable[0].rows;
             console.info(thd_tr);
@@ -317,7 +339,7 @@
                 }
 
             }
-            
+
             exportTable.find('input').each(function(index, elem) {
                 $(elem).remove();
             });
@@ -347,10 +369,30 @@
                 elem.click();
                 document.body.removeChild(elem);
             }
+
+
+            // 이미지 다운로드
+            var len = FILE_LIST.length;
+
+            for (var i = 0; i < len; i++) {
+                console.info(FILE_LIST[i]);
+
+                var imgName = getTd(i + 1, 3).innerHTML;
+               
+                
+                var elem = window.document.createElement('a');
+                elem.href = window.URL.createObjectURL(FILE_LIST[i]);
+                elem.download = imgName;
+                document.body.appendChild(elem);
+                elem.click();
+                document.body.removeChild(elem);
+                
+            }
+            
+            
+
         }
     </script>
 
 
-</body>
-
-</html>
+</body></html>

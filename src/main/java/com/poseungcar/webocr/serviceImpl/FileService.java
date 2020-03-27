@@ -91,13 +91,14 @@ public class FileService implements IFileService{
 			String fileType = file.getContentType().substring(file.getContentType().indexOf("/")+1);
 			//파일저장
 			
-			BufferedImage bfResizedImg = ImageTools.resize(file.getInputStream(), IMG_WIDTH, IMG_HEIGHT);
+			
 			
 			
 			File saveFilePath = new File(dir.getPath(), UUID.randomUUID().toString()+"."+fileType);
 			
-			ImageIO.write(bfResizedImg,fileType, saveFilePath);
-			//file.transferTo(saveFile);
+			//BufferedImage bfResizedImg = ImageTools.resize(file.getInputStream(), IMG_WIDTH, IMG_HEIGHT);
+			//ImageIO.write(bfResizedImg,fileType, saveFilePath);
+			file.transferTo(saveFilePath);
 			
 			model.addAttribute("msg", "이미지 업로드 완료");
 

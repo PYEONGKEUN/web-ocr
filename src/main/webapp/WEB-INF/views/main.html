@@ -57,7 +57,6 @@
             /* To center it vertically */
             color: white;
         }
-
     </style>
     <script>
         var agent = navigator.userAgent.toLowerCase();
@@ -69,7 +68,6 @@
             alert("해당 페이지는 익스플로러에서 작동하지 않습니다. 다른 브라우저로 접속해 주십시오.");
             window.location.href = './links';
         }
-
     </script>
 </head>
 
@@ -168,6 +166,11 @@
         $(document).ready(function() {
             // 파일추가 버튼 이벤트
             $('#btnSelectedImgs').click(function(e) {
+
+                if (isFinished) {
+                    alert("작업이 모두 끝났습니다. 파일 목록을 초기화한 뒤 다시 시도해주세요.");
+                    return null;
+                }
                 if (isProgress) {
                     alert("이미 작업중 입니다. 작업이 모두 끝나면 시도해주세요.");
                     return null;
@@ -457,7 +460,6 @@
                 document.body.removeChild(elem);
             }
         }
-
     </script>
 </body>
 

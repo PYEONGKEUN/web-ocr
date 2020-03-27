@@ -130,6 +130,9 @@ public class OcrServiceImpl implements OcrService {
 		//			
 		//logger.info(result.toString());
 		logger.info("---detectText End---");
+		
+		
+		// AWS 비용 절감을 위해
 		return true;
 	}
 

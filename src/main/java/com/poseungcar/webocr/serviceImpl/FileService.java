@@ -1,15 +1,18 @@
 package com.poseungcar.webocr.serviceImpl;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.poi.ss.util.ImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import com.poseungcar.webocr.DTO.OCR;
 import com.poseungcar.webocr.service.IFileService;
 import com.poseungcar.webocr.service.OcrService;
 import com.poseungcar.webocr.util.FileHash;
+import com.poseungcar.webocr.util.ImageTools;
 
 
 @Service
@@ -41,6 +45,8 @@ public class FileService implements IFileService{
 	@Value("${spring.profiles.active}")
 	private String activeProfile;
 	
+	
+	final int IMG_WIDTH = 2478, IMG_HEIGHT = 1746; 
 
 
 
@@ -84,9 +90,15 @@ public class FileService implements IFileService{
 			// image/jpeg 에서 jpeg만 가져오는 작업
 			String fileType = file.getContentType().substring(file.getContentType().indexOf("/")+1);
 			//파일저장
-			File saveFile = new File(dir.getPath(), UUID.randomUUID().toString()+"."+fileType);
 			
-			file.transferTo(saveFile);
+			BufferedImage bfResizedImg = ImageTools.resize(file.getInputStream(), IMG_WIDTH, IMG_HEIGHT);
+			
+			
+			File saveFilePath = new File(dir.getPath(), UUID.randomUUID().toString()+"."+fileType);
+			
+			ImageIO.write(bfResizedImg,fileType, saveFilePath);
+			//file.transferTo(saveFile);
+			
 			model.addAttribute("msg", "이미지 업로드 완료");
 
 			logger.info("File uploaded successfully.");
@@ -102,8 +114,8 @@ public class FileService implements IFileService{
 			
 
 			result.put("fileName", file.getOriginalFilename());
-			result.put("filePath", saveFile.getPath());
-			result.put("fileHash", FileHash.sha(saveFile.getPath()));
+			result.put("filePath", saveFilePath.getPath());
+			result.put("fileHash", FileHash.sha(saveFilePath.getPath()));
 			return result;
 			
 		} else {

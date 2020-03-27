@@ -49,9 +49,6 @@ public class OcrServiceImpl implements OcrService {
 	@Autowired
 	OcrDAO ocrDao;	
 
-
-
-
 	@Override
 	public boolean detectText(String id, String fileName,String filePath,String fileHash) throws FileNotFoundException, IOException{
 		// TODO Auto-generated method stub

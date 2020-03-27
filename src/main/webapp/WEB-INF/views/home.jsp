@@ -3,6 +3,7 @@
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>web-ocr</title>
@@ -16,6 +17,7 @@
             height: 100%;
             overflow: hidden;
         }
+
         body {
             margin: 0;
             padding: 0;
@@ -27,22 +29,27 @@
             font-family: "Luna";
             background: #454c55;
         }
+
         .content {
 
             background: white;
             padding: 30px;
             border-radius: 5px;
         }
+
         .hide {
             display: none;
         }
+
         .thumbnail {
             width: 180px;
             height: auto;
         }
+
         #selectedImgs {
             display: none;
         }
+
         #myBar {
             width: 0%;
             height: 40px;
@@ -63,8 +70,9 @@
         console.info(agent.indexOf("msie"));
         if ((navigator.appName == 'Netscape' && agent.indexOf('trident') != -1) || (agent.indexOf("msie") != -1)) {
             alert("해당 페이지는 익스플로러에서 작동하지 않습니다. 다른 브라우저로 접속해 주십시오.");
-            window.location.href='./links';
+            window.location.href = './links';
         }
+
     </script>
 </head>
 
@@ -165,6 +173,10 @@
             $('#btnSelectedImgs').click(function(e) {
                 if (isProgress) {
                     alert("이미 작업중 입니다. 작업이 모두 끝나면 시도해주세요.");
+                    return null;
+                }
+                if (hasDownoad) {
+                    alert("아직 작업 결과를 한 번도 다운로드하지 않았습니다.");
                     return null;
                 }
                 $('#selectedImgs').click();
@@ -308,6 +320,7 @@
                 url: './uploadimg.action',
                 data: formData,
                 success: function(status) {
+                    console.info(status);
                     if (status != 'error') {
                         // 요청 결과로 td 변경
                         //읽어온 번호 열
@@ -318,23 +331,36 @@
                         if (tdReadNum.hasChildNodes) {
                             tdReadNum.removeChild(tdReadNum.firstChild);
                         }
-                        var tmpCellText1 = document.createTextNode(status);
+                        var tmpCellText1 = document.createTextNode(status != "" ? status : "읽어오지 못하였습니다.");
                         tdReadNum.appendChild(tmpCellText1);
+
+
                         // 삭제 버튼 열
                         var tdDel = getTd(idx, 4);
                         //console.info("td is" + tdReadNum);
                         if (tdDel.hasChildNodes) {
                             tdDel.removeChild(tdDel.firstChild);
                         }
-                        var tmpCellTex2 = document.createTextNode("작업 완료");
+                        var tmpCellTex2 = document.createTextNode(status != "" ? "작업완료" : "오류발생");
                         tdDel.appendChild(tmpCellTex2);
                         // 파일명 변경 열
                         var tdChangedName = getTd(idx, 3);
-                        var fileType = getTd(idx, 1).innerHTML.split(".")[1];
-                        var fileName = getTd(idx, 2).innerHTML + "." + fileType;
+                        var fileType;
+                        var fileName;
+                        if (status != "") {
+                            fileType = getTd(idx, 1).innerHTML.split(".")[1];
+                            fileName = getTd(idx, 2).innerHTML + "." + fileType;
+                            console.info(status);
+                        } else {
+                            fileName = getTd(idx, 1).innerHTML;
+                            console.info(status);
+                        }
+
 
                         var tmpCellTex3 = document.createTextNode(fileName);
                         tdChangedName.appendChild(tmpCellTex3);
+
+
                         finishQueue.enqueue(1);
                     }
                 },
@@ -434,8 +460,9 @@
                 document.body.removeChild(elem);
             }
         }
+
     </script>
 </body>
 
 </html>
-	
+

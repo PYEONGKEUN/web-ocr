@@ -37,7 +37,7 @@ public class OcrDAOTest {
 	@Test
 	public void selectTest() throws Exception {
 //		logger.info(OCR.builder().build().toString());
-		List<OCR> ocrs = ocrDAO.select(OCR.builder().build());
+		List<OCR> ocrs = ocrDAO.select(OCR.builder().build(),0,1);
 		for(OCR ocr : ocrs) {
 			String json = ocr.getOcr_ocrResult();
 			Gson gson = new Gson();		

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.poseungcar.webocr.DAO.OcrDAO">
 
+<parameterMap type="com.poseungcar.webocr.DTO.OCR" id="ocr"/>
 
-
-<select id="select" resultType="com.poseungcar.webocr.DTO.OCR">
+<select id="selectAll" resultType="com.poseungcar.webocr.DTO.OCR">
     SELECT *
     FROM OCR
     <trim prefix="WHERE" prefixOverrides="AND|OR">
@@ -16,8 +16,23 @@
       <if test="ocr_ocrResult != null">AND ocr_ocrResult=#{ocr_ocrResult}</if>
       <if test="ocr_hash != null">AND ocr_hash=#{ocr_hash}</if>
     </trim>
-
   </select>
+  
+  <select id="select" resultType="com.poseungcar.webocr.DTO.OCR">
+    SELECT *
+    FROM OCR
+    <trim prefix="WHERE" prefixOverrides="AND|OR">
+      <if test="ocr.ocr_no != null">AND ocr_no=#{ocr.ocr_no}</if>
+      <if test="ocr.usr_id != null">AND usr_id=#{ocr.usr_id}</if>
+      <if test="ocr.ocr_fileName != null">AND ocr_fileName=#{ocr.ocr_fileName}</if>
+      <if test="ocr.ocr_filePath != null">AND ocr_filePath=#{ocr.ocr_filePath}</if>
+      <if test="ocr.ocr_datetime != null">AND ocr_datetime=#{ocr.ocr_datetime}</if>
+      <if test="ocr.ocr_ocrResult != null">AND ocr_ocrResult=#{ocr.ocr_ocrResult}</if>
+      <if test="ocr.ocr_hash != null">AND ocr_hash=#{ocr.ocr_hash}</if>
+    </trim>
+	LIMIT #{offset}, #{limit}
+  </select>
+  
 
   <update id="update" parameterType="com.poseungcar.webocr.DTO.OCR">
     UPDATE OCR

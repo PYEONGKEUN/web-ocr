@@ -35,5 +35,19 @@ public class HomeController {
 		
 		return "home";
 	}
+	// 브라우저 다운로드 링크
+	@RequestMapping(value = "/links", method = RequestMethod.GET)
+	public String links(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		
+		String formattedDate = dateFormat.format(date);
+		
+		model.addAttribute("serverTime", formattedDate );
+		
+		return "links";
+	}
 	
 }

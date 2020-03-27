@@ -62,8 +62,8 @@ public class OcrServiceImpl implements OcrService {
 				.ocr_hash(fileHash)
 				.build(); 
 		
-		List<OCR> findedocrs = ocrDao.select(findOCR);
-		if(findedocrs.size() == 1) {
+		List<OCR> findedocrs = ocrDao.select(findOCR,0,1);
+		if(findedocrs.size() >= 1) {
 			
 			
 			OCR ocr = OCR.builder()
@@ -81,7 +81,6 @@ public class OcrServiceImpl implements OcrService {
 			
 			return true;
 		}
-		
 		
 		
 
@@ -152,7 +151,7 @@ public class OcrServiceImpl implements OcrService {
 		//결과물을 담을 변수
 		String detectedVoucherNum = "";
 
-		List<OCR> ocrs = ocrDao.select(findOcr);
+		List<OCR> ocrs = ocrDao.select(findOcr,0,1);
 
 		
 		if(ocrs.size() == 0) {

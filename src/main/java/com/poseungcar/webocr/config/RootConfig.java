@@ -60,10 +60,10 @@ public class RootConfig {
 
 		ds.setTestWhileIdle(true);
 		ds.setValidationQuery("select 1");
+		ds.setValidationInterval(60000*60*4);
+		ds.setValidationQueryTimeout(10000);
 		ds.setMinEvictableIdleTimeMillis(60000*3);
 		ds.setTimeBetweenEvictionRunsMillis(10*1000);
-		ds.setValidationQueryTimeout(28800);
-		ds.setValidationInterval(28800);
 		
 		
 		return ds;

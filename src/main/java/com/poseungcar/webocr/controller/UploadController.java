@@ -35,6 +35,7 @@ public class UploadController {
 	@Autowired
 	OcrService ocrService;
 
+	
 	@ResponseBody
 	@RequestMapping(value="/uploadimg.action", method=RequestMethod.POST, produces="text/plain;charset=utf-8")
 	public String singleFileUpload(
@@ -43,7 +44,7 @@ public class UploadController {
 			Model model,
 			HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		
+		//MultipartFile는 자바스크립트로 File객체와 Bloc 객체를 받을수 있다.
 		Map<String,Object> uploadResult;
 
 		uploadResult= fileService.imgUpload(file, model, session, request, response);
@@ -53,7 +54,7 @@ public class UploadController {
 				uploadResult.get("filePath").toString(),
 				uploadResult.get("fileHash").toString());
 
-		String result = ocrService.getVoucherNum(
+		String result = ocrService.getVoucherNumByRegEx(
 				"default", 
 				uploadResult.get("fileName").toString(), 
 				uploadResult.get("filePath").toString());

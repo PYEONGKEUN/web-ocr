@@ -60,6 +60,7 @@
             /* To center it vertically */
             color: white;
         }
+
     </style>
     <script>
         var agent = navigator.userAgent.toLowerCase();
@@ -71,6 +72,7 @@
             alert("해당 페이지는 익스플로러에서 작동하지 않습니다. 다른 브라우저로 접속해 주십시오.");
             window.location.href = './links';
         }
+
     </script>
 </head>
 
@@ -185,6 +187,10 @@
                 $('#selectedImgs').click();
             });
         });
+
+
+
+
         //엑셀 다운
         $("#downExcel").click(
             function() {
@@ -192,6 +198,8 @@
             }
         );
         var FILE_LIST = new Array();
+
+
 
         function resetFiles() {
             if (hasDownoad) {
@@ -211,6 +219,50 @@
             isProgress = false;
         }
 
+        var resizeImage = function(settings) {
+            var file = settings.file;
+            var reader = new FileReader();
+            var image = new Image();
+            var canvas = document.createElement('canvas');
+            var dataURItoBlob = function(dataURI) {
+                var bytes = dataURI.split(',')[0].indexOf('base64') >= 0 ?
+                    atob(dataURI.split(',')[1]) :
+                    unescape(dataURI.split(',')[1]);
+                var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                var max = bytes.length;
+                var ia = new Uint8Array(max);
+                for (var i = 0; i < max; i++)
+                    ia[i] = bytes.charCodeAt(i);
+                return new Blob([ia], {
+                    type: 'image/jpeg'
+                });
+            };
+            var resize = function() {
+                var width = 2478;
+                var height = 1746;
+
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+                var dataUrl = canvas.toDataURL('image/jpeg');
+                return dataURItoBlob(dataUrl);
+            };
+            return new Promise(function(ok, no) {
+                if (!file.type.match(/image.*/)) {
+                    no(new Error("Not an image"));
+                    return;
+                }
+                reader.onload = function(readerEvent) {
+                    image.onload = function() {
+                        return ok(resize());
+                    };
+                    image.src = readerEvent.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+
         function onChangeSelectedImgs() {
             //function() {
             //console.log("img in changed");
@@ -218,6 +270,9 @@
             var fileLen = files.length;
             //console.log(files);
             var dataTable = document.getElementById('dataTable');
+
+
+
             //console.log(dataTable);
             //}
             // 파일을 읽고 dataTable에 정보 추가
@@ -225,7 +280,7 @@
                 // `file.name` 형태의 확장자 규칙에 주의하세요
                 if (/\.(jpe?g|png|gif)$/i.test(file.name)) {
                     //console.log(FILE_LIST);
-                    FILE_LIST.push(file);
+
 
                     var reader = new FileReader();
 
@@ -237,13 +292,23 @@
                         tmpRow.appendChild(tmpCell1);
 
                         var tmpCell2 = document.createElement("td");
-                        //var img = new Image();
-                        //img.src = this.result;
-                        //img.className = "thumbnail";
+
+                        //이미지 처리
+                        var canvas = document.createElement('canvas');
+
+                        var img = new Image();
+                        var width = 2478;
+                        var height = 1746;
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        img.src = this.result;
+                        img.className = "thumbnail";
 
                         var tmpCellText2 = document.createTextNode("");
-                        tmpCell2.appendChild(tmpCellText2);
-                        tmpCell2.appendChild(tmpCellText2);
+                        //tmpCell2.appendChild(tmpCellText2);
+                        tmpCell2.appendChild(img);
                         tmpRow.appendChild(tmpCell2);
 
                         var tmpCell3 = document.createElement("td");
@@ -271,9 +336,20 @@
                         dataTable.appendChild(tmpRow);
                         //console.log(tmpRow);
                     }, false);
-                    reader.readAsDataURL(file);
+
+
+                    resizeImage({
+                        file: file
+                    }).then(function(resizedImage) {
+                        reader.readAsDataURL(file);
+                        // resizing 이후 파일
+                        FILE_LIST.push(resizedImage);
+                    });
+
 
                 }
+
+
             }
 
 
@@ -389,6 +465,8 @@
             return selectedTd;
         }
 
+        var WAIT_TIME = 100;
+
         function fnExcelReport(id, title) {
             if (!isFinished) {
                 alert("작업 후에 다운로드해 주세요.");
@@ -450,20 +528,59 @@
                 document.body.removeChild(elem);
             }
             // 이미지 다운로드
-            var len = FILE_LIST.length;
 
+
+            delayDownloadImg();
+        }
+
+        //        async function taskDownloagImg(i) {
+        //            
+        //            return new Pormise((resolve, reject)=>{
+        //                resolve();
+        //            }
+        //            
+        //            
+        //            );
+        //            var imgName = getTd(i + 1, 3).innerHTML;
+        //            var elem = window.document.createElement('a');
+        //            elem.href = window.URL.createObjectURL(FILE_LIST[i]);
+        //            elem.download = imgName;
+        //            document.body.appendChild(elem);
+        //            elem.click();
+        //            document.body.removeChild(elem);
+        //
+        //        }
+
+        function downloagImg(i) {
+            return new Promise(function(resolve, reject){
+                setTimeout(() => {
+                    var imgName = getTd(i + 1, 3).innerHTML;
+                    var elem = window.document.createElement('a');
+                    elem.href = window.URL.createObjectURL(FILE_LIST[i]);
+                    elem.download = imgName;
+                    document.body.appendChild(elem);
+                    elem.click();
+                    document.body.removeChild(elem);
+                    resolve("complete");
+                }, WAIT_TIME);
+            });
+
+
+        }
+
+        async function delayDownloadImg() {
+            var len = FILE_LIST.length;
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
-                var imgName = getTd(i + 1, 3).innerHTML;
-                var elem = window.document.createElement('a');
-                elem.href = window.URL.createObjectURL(FILE_LIST[i]);
-                elem.download = imgName;
-                document.body.appendChild(elem);
-                elem.click();
-                document.body.removeChild(elem);
+                await downloagImg(i);
+
             }
         }
+
     </script>
 </body>
 
 </html>
+
+
+	

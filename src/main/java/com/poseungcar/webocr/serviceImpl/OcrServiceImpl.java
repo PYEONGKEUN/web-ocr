@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpSession;
 
@@ -196,6 +198,61 @@ public class OcrServiceImpl implements OcrService {
 		if( removeIdx != -1) {
 			detectedVoucherNum = detectedVoucherNum.substring(removeIdx+1);
 		}
+
+
+
+		return detectedVoucherNum;
+	}
+	
+	public String getVoucherNumByRegEx(String id, String fileName,String filePath) {
+		//번호를 찾을 대상 OCR
+		OCR findOcr = OCR.builder()
+				.usr_id(id)
+				.ocr_fileName(fileName)
+				.ocr_filePath(filePath)
+				.build();
+
+		//결과물을 담을 변수
+		String detectedVoucherNum = "";
+
+		List<OCR> ocrs = ocrDao.select(findOcr,0,1);
+
+		
+		if(ocrs.size() == 0) {
+			logger.info("OCR result is not found.");
+			return null;
+		}
+		
+		//하나만 고르기때문에 가장 첫번째
+		String json = ocrs.get(0).getOcr_ocrResult();		
+		
+
+		Gson gson = new Gson();	
+		//json 형식의 String에서 List<EntityAnnotation>객체를 생성
+		List<EntityAnnotation> annotations = gson.fromJson(json, new TypeToken<List<EntityAnnotation>>(){}.getType());
+
+		//해당 엔티티어노테이션에 
+		String allTxt = annotations.get(0).getDescription();
+		Pattern  regExPattern = Pattern.compile("[0-9]{1}-[0-9]{6}-[0-9]{5}");
+		Matcher m = regExPattern.matcher(allTxt);
+		
+		if(m.find())
+        {
+			detectedVoucherNum = m.group();
+        }
+        else
+        {
+        	detectedVoucherNum = null;
+        }    
+
+
+
+
+	
+
+		
+
+
 
 
 

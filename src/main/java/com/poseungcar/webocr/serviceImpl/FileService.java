@@ -96,9 +96,9 @@ public class FileService implements IFileService{
 			
 			File saveFilePath = new File(dir.getPath(), UUID.randomUUID().toString()+"."+fileType);
 			
-			//BufferedImage bfResizedImg = ImageTools.resize(file.getInputStream(), IMG_WIDTH, IMG_HEIGHT);
-			//ImageIO.write(bfResizedImg,fileType, saveFilePath);
-			file.transferTo(saveFilePath);
+			BufferedImage bfResizedImg = ImageTools.resize(file.getInputStream(), IMG_WIDTH, IMG_HEIGHT);
+			ImageIO.write(bfResizedImg,fileType, saveFilePath);
+			//file.transferTo(saveFilePath);
 			
 			model.addAttribute("msg", "이미지 업로드 완료");
 

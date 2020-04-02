@@ -11,4 +11,5 @@ public interface OcrService {
 	
 	public boolean detectText(String id, String fileName,String filePath,String fileHash)  throws FileNotFoundException, IOException;
 	public String getVoucherNum(String id, String fileName,String filePath);
+	public String getVoucherNumByRegEx(String id, String fileName,String filePath);
 }

@@ -1,5 +1,6 @@
 package com.poseungcar.webocr.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -7,9 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-
-
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,13 +22,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.poseungcar.webocr.service.IFileService;
 import com.poseungcar.webocr.service.OcrService;
+import com.poseungcar.webocr.serviceImpl.OcrServiceImpl;
 
 
 @Controller
 @RestController
 public class UploadController {
 
-
+	private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
 	@Autowired
 	IFileService fileService;
 
@@ -63,6 +64,21 @@ public class UploadController {
 		if(result == null) {
 			result = "error";
 		}
+		
+		File delFile = new File(uploadResult.get("filePath").toString());
+		if( delFile.exists() ){
+			if(delFile.delete()){ 
+				logger.info("파일삭제 성공"); 
+			}
+			else{
+				logger.info("파일삭제 실패"); 
+			} 
+		}else{ 
+			logger.info("파일이 존재하지 않습니다."); 
+		}
+   
+		
+		
 		return result;
 
 	}

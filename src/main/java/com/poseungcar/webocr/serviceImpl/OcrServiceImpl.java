@@ -1,5 +1,6 @@
 package com.poseungcar.webocr.serviceImpl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -132,6 +133,9 @@ public class OcrServiceImpl implements OcrService {
 		//			
 		//logger.info(result.toString());
 		logger.info("---detectText End---");
+
+
+
 		
 		
 		// AWS 비용 절감을 위해
@@ -233,6 +237,9 @@ public class OcrServiceImpl implements OcrService {
 
 		//해당 엔티티어노테이션에 
 		String allTxt = annotations.get(0).getDescription();
+		// 공백 줄바꿈 제거
+		allTxt = allTxt.replaceAll(" ", "");
+		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
 		Pattern  regExPattern = Pattern.compile("[0-9]{1}-[0-9]{6}-[0-9]{5}");
 		Matcher m = regExPattern.matcher(allTxt);
 		
@@ -245,7 +252,7 @@ public class OcrServiceImpl implements OcrService {
         	detectedVoucherNum = null;
         }    
 
-
+		
 
 
 	

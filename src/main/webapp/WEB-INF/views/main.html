@@ -184,14 +184,34 @@
                 $('#selectedImgs').click();
             });
         });
-
-
+        /**
+         *  yyyyMMdd 포맷으로 반환
+         */
+        function getFormatDate(date) {
+            var year = date.getFullYear(); //yyyy
+            var month = (1 + date.getMonth()); //M
+            month = month >= 10 ? month : '0' + month; //month 두자리로 저장
+            var day = date.getDate(); //d
+            day = day >= 10 ? day : '0' + day; //day 두자리로 저장
+            var hour = date.getHours();
+            hour = hour >= 10 ? hour : '0' + hour; //hour 두자리로 저장
+            var min = date.getMinutes();
+            min = min >= 10 ? min : '0' + min; //min 두자리로 저장
+            var sec = date.getSeconds();
+            sec = sec >= 10 ? sec : '0' + sec; //sec 두자리로 저장
+            return year + '_' + month + '_' + day + "_" + hour + "" + min + "" + sec;
+        }
 
 
         //엑셀 다운
         $("#downExcel").click(
             function() {
-                fnExcelReport("totalTable", "web-cor-작업결과");
+
+
+
+                var date = new Date();
+                var title = getFormatDate(date);
+                fnExcelReport("totalTable", title);
             }
         );
         var FILE_LIST = new Array();
@@ -216,48 +236,48 @@
             isProgress = false;
         }
 
-        var resizeImage = function(settings) {
-            var file = settings.file;
-            var reader = new FileReader();
-            var image = new Image();
-            var canvas = document.createElement('canvas');
-            var dataURItoBlob = function(dataURI) {
-                var bytes = dataURI.split(',')[0].indexOf('base64') >= 0 ?
-                    atob(dataURI.split(',')[1]) :
-                    unescape(dataURI.split(',')[1]);
-                var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
-                var max = bytes.length;
-                var ia = new Uint8Array(max);
-                for (var i = 0; i < max; i++)
-                    ia[i] = bytes.charCodeAt(i);
-                return new Blob([ia], {
-                    type: 'image/jpeg'
-                });
-            };
-            var resize = function() {
-                var width = 2478;
-                var height = 1746;
-
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-                var dataUrl = canvas.toDataURL('image/jpeg');
-                return dataURItoBlob(dataUrl);
-            };
-            return new Promise(function(ok, no) {
-                if (!file.type.match(/image.*/)) {
-                    no(new Error("Not an image"));
-                    return;
-                }
-                reader.onload = function(readerEvent) {
-                    image.onload = function() {
-                        return ok(resize());
-                    };
-                    image.src = readerEvent.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        };
+        //        var resizeImage = function(settings) {
+        //            var file = settings.file;
+        //            var reader = new FileReader();
+        //            var image = new Image();
+        //            var canvas = document.createElement('canvas');
+        //            var dataURItoBlob = function(dataURI) {
+        //                var bytes = dataURI.split(',')[0].indexOf('base64') >= 0 ?
+        //                    atob(dataURI.split(',')[1]) :
+        //                    unescape(dataURI.split(',')[1]);
+        //                var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        //                var max = bytes.length;
+        //                var ia = new Uint8Array(max);
+        //                for (var i = 0; i < max; i++)
+        //                    ia[i] = bytes.charCodeAt(i);
+        //                return new Blob([ia], {
+        //                    type: 'image/jpeg'
+        //                });
+        //            };
+        //            var resize = function() {
+        //                var width = 2478;
+        //                var height = 1746;
+        //
+        //                canvas.width = width;
+        //                canvas.height = height;
+        //                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+        //                var dataUrl = canvas.toDataURL('image/jpeg');
+        //                return dataURItoBlob(dataUrl);
+        //            };
+        //            return new Promise(function(ok, no) {
+        //                if (!file.type.match(/image.*/)) {
+        //                    no(new Error("Not an image"));
+        //                    return;
+        //                }
+        //                reader.onload = function(readerEvent) {
+        //                    image.onload = function() {
+        //                        return ok(resize());
+        //                    };
+        //                    image.src = readerEvent.target.result;
+        //                };
+        //                reader.readAsDataURL(file);
+        //            });
+        //        };
 
 
         function onChangeSelectedImgs() {
@@ -333,15 +353,8 @@
                         dataTable.appendChild(tmpRow);
                         //console.log(tmpRow);
                     }, false);
-
-
-                    resizeImage({
-                        file: file
-                    }).then(function(resizedImage) {
-                        reader.readAsDataURL(file);
-                        // resizing 이후 파일
-                        FILE_LIST.push(resizedImage);
-                    });
+                    reader.readAsDataURL(file);
+                    FILE_LIST.push(file);
 
 
                 }
@@ -382,6 +395,7 @@
         async function asyncImgs(len) {
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
+                // html element 노드는 1 부터 시작
                 await sendFile(FILE_LIST[i], i + 1);
             }
         }
@@ -391,7 +405,7 @@
         function sendFile(file, idx) {
             return new Promise((resolve, reject) => {
 
-                console.info("sendFile : " +idx+"--"+new Date());
+                console.info("sendFile : " + idx + "--" + new Date());
                 var formData = new FormData();
                 formData.append('mediaFile', file);
 
@@ -499,11 +513,27 @@
             for (var i = 0; i < thd_tr_len; i++) {
 
                 thd_td = thd_tr[i].cells;
-                //console.info(thd_td);
-                //document.getElementById('msg').innerHTML = thd_td.length;
-                if (thd_td.length > 2) {
-                    thd_tr[i].deleteCell(thd_td.length - 1);
+                console.info(thd_td);
+
+                //thd_tr[i].deleteCell(thd_td.length - 1);
+                //cells는 0부터 시작
+                thd_td[thd_td.length - 1].removeChild(thd_td[thd_td.length - 1].firstChild);
+                var tmpStr = "";
+                if (i == 0) {
+
+                    tmpStr = "날짜";
+
+                } else {
+                    // 파일 명에서 날짜 분리 SCAN_20200302_173106407 -> 20200302
+                    tmpStr = thd_td[0].innerHTML.split("_")[1];
+
                 }
+                console.info(tmpStr);
+                var tmpText = document.createTextNode(tmpStr);
+                thd_td[thd_td.length - 1].appendChild(tmpText);
+
+
+
             }
             exportTable.find('input').each(function(index, elem) {
                 $(elem).remove();
@@ -561,6 +591,7 @@
         function downloagImg(i) {
             return new Promise(function(resolve, reject) {
                 setTimeout(() => {
+                    // html element 노드는 1 부터 시작
                     var imgName = getTd(i + 1, 3).innerHTML;
                     var elem = window.document.createElement('a');
                     elem.href = window.URL.createObjectURL(FILE_LIST[i]);

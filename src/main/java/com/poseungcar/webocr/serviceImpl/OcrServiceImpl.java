@@ -1,29 +1,18 @@
 package com.poseungcar.webocr.serviceImpl;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.json.Json;
 import com.google.cloud.vision.v1.AnnotateImageRequest;
 import com.google.cloud.vision.v1.AnnotateImageResponse;
 import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
@@ -38,7 +27,6 @@ import com.google.cloud.vision.v1.Feature.Type;
 import com.google.protobuf.ByteString;
 import com.poseungcar.webocr.DAO.OcrDAO;
 import com.poseungcar.webocr.DTO.OCR;
-import com.poseungcar.webocr.DTO.OCR.OCRBuilder;
 import com.poseungcar.webocr.service.OcrService;
 import com.poseungcar.webocr.util.TimeLib;
 
@@ -47,7 +35,6 @@ import com.poseungcar.webocr.util.TimeLib;
 public class OcrServiceImpl implements OcrService {
 
 	private static final Logger logger = LoggerFactory.getLogger(OcrServiceImpl.class);
-
 
 	@Autowired
 	OcrDAO ocrDao;	
@@ -63,8 +50,8 @@ public class OcrServiceImpl implements OcrService {
 				.build(); 
 		
 		List<OCR> findedocrs = ocrDao.select(findOCR,0,1);
-		if(findedocrs.size() >= 1) {
-			
+		// 같은 해시값을 가진 파일지 존재한다면 OCR 결과를 가져와서 저장후 종료
+		if(findedocrs.size() >= 1) {			
 			
 			OCR ocr = OCR.builder()
 					.usr_id(id)
@@ -81,36 +68,37 @@ public class OcrServiceImpl implements OcrService {
 			
 			return true;
 		}
-		
-		
-
-
+		//GOOGLE VISION API에 서비스를 요청하기 위한  객체
 		List<AnnotateImageRequest> requests = new ArrayList<>();
-
+		// 이미지 전송을 위해 이미지의 바이트를 읽어와서 구글 이미지 객체에 세팅
 		ByteString imgBytes = ByteString.readFrom(new FileInputStream(filePath));
-
-		Image img = Image.newBuilder().setContent(imgBytes).build();			
+		Image img = Image.newBuilder().setContent(imgBytes).build();	
+		//GOOGLE VISION API 요청 객체를 생성
 		Feature feat = Feature.newBuilder().setTypeValue(Type.DOCUMENT_TEXT_DETECTION_VALUE).build();
 		AnnotateImageRequest request =
 				AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
 		requests.add(request);
 
+		
 		try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
+			//GOOGLE VISION API 요청
 			BatchAnnotateImagesResponse response = client.batchAnnotateImages(requests);
+			//GOOGLE VISION API 요청 결과를 가져옴
 			List<AnnotateImageResponse> responses = response.getResponsesList();
-
+			// 요청 결과 에러가 발생하지 않았다면 OCR인식 결과를 DB에 저장
 			for (AnnotateImageResponse res : responses) {
 				if (res.hasError()) {
 
 					logger.error("Error: %s\n", res.getError().getMessage());
 					return false;
 				}
-
+				
 				Gson gson = new Gson();
 
+				//변환 객체 -> Json String 
 				String json = gson.toJson(res.getTextAnnotationsList());
 				//logger.info(json);
-
+				
 				OCR ocr = OCR.builder()
 						.usr_id(id)
 						.ocr_datetime(TimeLib.getCurrDateTime())
@@ -120,23 +108,10 @@ public class OcrServiceImpl implements OcrService {
 						.ocr_hash(fileHash)
 						.build();
 
-				//logger.debug(ocr.toString());
-
 				ocrDao.insert(ocr);
 			}
 		}
-		//		}catch(Exception e) {
-		//			for(StackTraceElement el : e.getStackTrace()) {
-		//				logger.error(el.toString());
-		//			}			
-		//		}
-		//			
-		//logger.info(result.toString());
-		logger.info("---detectText End---");
-
-
-
-		
+		logger.info("---detectText End---");		
 		
 		// AWS 비용 절감을 위해
 		return true;
@@ -158,16 +133,13 @@ public class OcrServiceImpl implements OcrService {
 		String detectedVoucherNum = "";
 
 		List<OCR> ocrs = ocrDao.select(findOcr,0,1);
-
 		
 		if(ocrs.size() == 0) {
 			logger.info("OCR result is not found.");
 			return null;
-		}
-		
+		}		
 		//하나만 고르기때문에 가장 첫번째
 		String json = ocrs.get(0).getOcr_ocrResult();		
-		
 
 		Gson gson = new Gson();	
 		//json 형식의 String에서 List<EntityAnnotation>객체를 생성
@@ -186,25 +158,19 @@ public class OcrServiceImpl implements OcrService {
 				if(!(thisX >= minX && thisX <= MaxX)) isInRect = false;
 				if(!(thisY >= minY && thisY <= MaxY)) isInRect = false;
 			}
-
 			if(isInRect) {
 				//					logger.info("--------------"+n++);
 				//					logger.info(annotation.getDescription());
 				//					logger.info(annotation.getBoundingPoly().toString());
 				detectedVoucherNum+=annotation.getDescription();
 			}
-
 		}
-
 		//필요없는 문자열 처리
 		int removeIdx = detectedVoucherNum.indexOf('|');
 
 		if( removeIdx != -1) {
 			detectedVoucherNum = detectedVoucherNum.substring(removeIdx+1);
 		}
-
-
-
 		return detectedVoucherNum;
 	}
 	
@@ -220,7 +186,6 @@ public class OcrServiceImpl implements OcrService {
 		String detectedVoucherNum = "";
 
 		List<OCR> ocrs = ocrDao.select(findOcr,0,1);
-
 		
 		if(ocrs.size() == 0) {
 			logger.info("OCR result is not found.");
@@ -237,7 +202,8 @@ public class OcrServiceImpl implements OcrService {
 
 		//해당 엔티티어노테이션에 
 		String allTxt = annotations.get(0).getDescription();
-		// 공백 줄바꿈 제거
+		
+		// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
 		allTxt = allTxt.replaceAll(" ", "");
 		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
 		Pattern  regExPattern = Pattern.compile("[0-9]{1}-[0-9]{6}-[0-9]{5}");
@@ -248,21 +214,10 @@ public class OcrServiceImpl implements OcrService {
 			detectedVoucherNum = m.group();
         }
         else
-        {
+        {	
+        	//못찾는다면 null을 리턴
         	detectedVoucherNum = null;
         }    
-
-		
-
-
-	
-
-		
-
-
-
-
-
 		return detectedVoucherNum;
 	}
 

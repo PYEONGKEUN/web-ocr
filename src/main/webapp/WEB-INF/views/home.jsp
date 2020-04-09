@@ -1,4 +1,3 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -152,6 +151,7 @@
             }
         }
         var finishQueue = new Queue();
+        var startQueue = new Queue();
         var intervalId = null;
         var checkProcess = function() {
             console.info(remainTask);
@@ -399,7 +399,13 @@
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
                 // html element 노드는 1 부터 시작
-                await sendFile(FILE_LIST[i], i + 1);
+                startQueue.enqueue([FILE_LIST[i], i + 1]);
+            }
+            for (var i = 0; i < len; i++) {
+                //console.info(FILE_LIST[i]);
+                // html element 노드는 1 부터 시작
+                var jobs = startQueue.dequeue()
+                await sendFile(jobs[0],jobs[1]);
             }
         }
 
@@ -421,6 +427,9 @@
                     data: formData,
                     success: function(status) {
                         console.info(status);
+                        if(status == 'error'){
+                            startQueue.enqueue([file, idx]);
+                        }
                         if (status != 'error') {
                             // 요청 결과로 td 변경
                             //읽어온 번호 열
@@ -468,6 +477,7 @@
                     contentType: false,
                     // 아래 error 함수를 이용해 콘솔창으로 디버깅을 한다.
                     error: function(jqXHR, textStatus, errorThrown) {
+                        startQueue.enqueue([file, idx]);
                         //console.log(jqXHR.responseText);
                     }
                 });
@@ -622,5 +632,3 @@
 </body>
 
 </html>
-
-	

@@ -551,6 +551,7 @@
                 } else {
                     // 파일 명에서 날짜 분리 SCAN_20200302_173106407 -> 20200302
                     tmpStr = thd_td[0].innerHTML.split("_")[1];
+                    tmpStr = tmpStr.substring(0,4) +"-"+tmpStr.substring(4,6)+"-"+tmpStr.substring(6);
 
                 }
                 console.info(tmpStr);

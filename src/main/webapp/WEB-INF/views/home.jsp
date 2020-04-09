@@ -157,6 +157,7 @@
             console.info(remainTask);
             if (remainTask === 0) {
                 clearInterval(intervalId);
+                intervalId = null;
                 isProgress = false;
                 hasDownoad = true;
                 isFinished = true;
@@ -402,7 +403,13 @@
                 startQueue.enqueue([FILE_LIST[i], i + 1]);
             }
             while (hasData()) {
-                var jobs = startQueue.dequeue()
+                var jobs = startQueue.dequeue();
+                sendFile(jobs[0], jobs[1]);
+                jobs = startQueue.dequeue();
+                sendFile(jobs[0], jobs[1]);
+                jobs = startQueue.dequeue();
+                sendFile(jobs[0], jobs[1]);
+                jobs = startQueue.dequeue();
                 await sendFile(jobs[0], jobs[1]);
             }
         }
@@ -634,3 +641,4 @@
 </body>
 
 </html>
+

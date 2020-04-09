@@ -402,7 +402,7 @@
                 // html element 노드는 1 부터 시작
                 startQueue.enqueue([FILE_LIST[i], i + 1]);
             }
-            while (hasData()) {
+            while (startQueue.hasData()) {
                 var jobs = startQueue.dequeue();
                 sendFile(jobs[0], jobs[1]);
                 jobs = startQueue.dequeue();

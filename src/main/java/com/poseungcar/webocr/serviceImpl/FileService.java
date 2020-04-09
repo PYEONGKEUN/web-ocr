@@ -28,6 +28,7 @@ import com.poseungcar.webocr.service.IFileService;
 import com.poseungcar.webocr.service.OcrService;
 import com.poseungcar.webocr.util.FileHash;
 import com.poseungcar.webocr.util.ImageTools;
+import com.poseungcar.webocr.util.TimeLib;
 
 
 @Service
@@ -61,7 +62,7 @@ public class FileService implements IFileService{
 
 		
 		Map<String, Object> result = new HashMap<String, Object>();
-		logger.info("File uploaded loading.");
+		logger.info("["+TimeLib.getCurrTime()+"] File uploaded loading.");
 
 
 		//REAL_PATH : /opt/webocr/imgs
@@ -102,7 +103,7 @@ public class FileService implements IFileService{
 			
 			model.addAttribute("msg", "이미지 업로드 완료");
 
-			logger.info("File uploaded successfully.");
+			logger.info("["+TimeLib.getCurrTime()+"] File uploaded successfully.");
 
 
 //			//사이트의 순수한 주소

@@ -42,7 +42,7 @@ public class OcrServiceImpl implements OcrService {
 	@Override
 	public boolean detectText(String id, String fileName,String filePath,String fileHash) throws FileNotFoundException, IOException{
 		// TODO Auto-generated method stub
-		logger.info("---detectText Start---");		
+		logger.info("["+TimeLib.getCurrTime()+"] ---detectText Start---");		
 
 		// 같은 해시값을 가진 파일을 찾음
 		OCR findOCR =OCR.builder()
@@ -65,9 +65,10 @@ public class OcrServiceImpl implements OcrService {
 			//logger.debug(ocr.toString());
 
 			ocrDao.insert(ocr);
-			
+			logger.info("["+TimeLib.getCurrTime()+"] ---detectText End---");	
 			return true;
 		}
+		logger.info("["+TimeLib.getCurrTime()+"] ---Google Vision API Start---");	
 		//GOOGLE VISION API에 서비스를 요청하기 위한  객체
 		List<AnnotateImageRequest> requests = new ArrayList<>();
 		// 이미지 전송을 위해 이미지의 바이트를 읽어와서 구글 이미지 객체에 세팅
@@ -89,9 +90,10 @@ public class OcrServiceImpl implements OcrService {
 			for (AnnotateImageResponse res : responses) {
 				if (res.hasError()) {
 
-					logger.error("Error: %s\n", res.getError().getMessage());
+					logger.error("["+TimeLib.getCurrTime()+"] Error: %s\n", res.getError().getMessage());
 					return false;
 				}
+				logger.info("["+TimeLib.getCurrTime()+"] ---Google Vision API End---");
 				
 				Gson gson = new Gson();
 
@@ -107,11 +109,15 @@ public class OcrServiceImpl implements OcrService {
 						.ocr_ocrResult(json)
 						.ocr_hash(fileHash)
 						.build();
+				
 
-				ocrDao.insert(ocr);
+				if(ocrDao.insert(ocr) == 1) {
+					logger.info("["+TimeLib.getCurrTime()+"] "+ocr.getOcr_fileName() +" is saved as "+ocr.getOcr_filePath());
+				}
+				
 			}
 		}
-		logger.info("---detectText End---");		
+		logger.info("["+TimeLib.getCurrTime()+"] ---detectText End---");		
 		
 		// AWS 비용 절감을 위해
 		return true;
@@ -123,6 +129,7 @@ public class OcrServiceImpl implements OcrService {
 
 	public String getVoucherNum(String id, String fileName,String filePath) {
 		//번호를 찾을 대상 OCR
+		logger.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum Start---");	
 		OCR findOcr = OCR.builder()
 				.usr_id(id)
 				.ocr_fileName(fileName)
@@ -165,16 +172,17 @@ public class OcrServiceImpl implements OcrService {
 				detectedVoucherNum+=annotation.getDescription();
 			}
 		}
-		//필요없는 문자열 처리
-		int removeIdx = detectedVoucherNum.indexOf('|');
+		//필요없는 문자열 처리		
+		detectedVoucherNum = detectedVoucherNum.replaceAll(" |", "");
 
-		if( removeIdx != -1) {
-			detectedVoucherNum = detectedVoucherNum.substring(removeIdx+1);
-		}
+
+		logger.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);	
+		logger.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");	
 		return detectedVoucherNum;
 	}
 	
 	public String getVoucherNumByRegEx(String id, String fileName,String filePath) {
+		logger.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum Start---");	
 		//번호를 찾을 대상 OCR
 		OCR findOcr = OCR.builder()
 				.usr_id(id)
@@ -216,8 +224,10 @@ public class OcrServiceImpl implements OcrService {
         else
         {	
         	//못찾는다면 null을 리턴
-        	detectedVoucherNum = null;
-        }    
+        	detectedVoucherNum = getVoucherNum(id,fileName,filePath);
+        }
+		logger.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);	
+		logger.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");	
 		return detectedVoucherNum;
 	}
 

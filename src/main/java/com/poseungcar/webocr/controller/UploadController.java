@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.poseungcar.webocr.service.IFileService;
 import com.poseungcar.webocr.service.OcrService;
 import com.poseungcar.webocr.serviceImpl.OcrServiceImpl;
+import com.poseungcar.webocr.util.TimeLib;
 
 
 @Controller
@@ -60,10 +61,10 @@ public class UploadController {
 				uploadResult.get("fileName").toString(), 
 				uploadResult.get("filePath").toString());
 
-
-		if(result == null) {
-			result = "error";
-		}
+// 클라이언트 단에서는 ""  값으로 에러 처리중
+//		if(result == null) {
+//			result = "error";
+//		}
 		
 		File delFile = new File(uploadResult.get("filePath").toString());
 		if( delFile.exists() ){

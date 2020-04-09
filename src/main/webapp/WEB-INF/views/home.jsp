@@ -401,11 +401,9 @@
                 // html element 노드는 1 부터 시작
                 startQueue.enqueue([FILE_LIST[i], i + 1]);
             }
-            for (var i = 0; i < len; i++) {
-                //console.info(FILE_LIST[i]);
-                // html element 노드는 1 부터 시작
+            while (hasData()) {
                 var jobs = startQueue.dequeue()
-                await sendFile(jobs[0],jobs[1]);
+                await sendFile(jobs[0], jobs[1]);
             }
         }
 
@@ -427,51 +425,55 @@
                     data: formData,
                     success: function(status) {
                         console.info(status);
-                        if(status == 'error'){
-                            startQueue.enqueue([file, idx]);
+
+                        // 요청 결과로 td 변경
+                        //읽어온 번호 열
+                        //console.info(status);
+                        var tdReadNum = getTd(idx, 2);
+
+                        //console.info("td is" + tdReadNum);
+                        if (tdReadNum.hasChildNodes) {
+                            tdReadNum.removeChild(tdReadNum.firstChild);
                         }
+                        var tmpCellText1 = document.createTextNode(status != "error" ? status : "읽어오지 못하였습니다.");
+                        tdReadNum.appendChild(tmpCellText1);
+
+
+                        // 삭제 버튼 열
+                        var tdDel = getTd(idx, 4);
+                        //console.info("td is" + tdReadNum);
+                        if (tdDel.hasChildNodes) {
+                            tdDel.removeChild(tdDel.firstChild);
+                        }
+                        var tmpCellTex2 = document.createTextNode(status != "error" ? "작업완료" : "오류발생");
+                        tdDel.appendChild(tmpCellTex2);
+                        // 파일명 변경 열
+                        var tdChangedName = getTd(idx, 3);
+                        var fileType;
+                        var fileName;
+                        if (status != "error") {
+                            fileType = getTd(idx, 1).innerHTML.split(".")[1];
+                            fileName = getTd(idx, 2).innerHTML + "." + fileType;
+                        } else {
+                            fileName = getTd(idx, 1).innerHTML;
+                        }
+
+
+                        var tmpCellTex3 = document.createTextNode(fileName);
+                        tdChangedName.appendChild(tmpCellTex3);
+
+
                         if (status != 'error') {
-                            // 요청 결과로 td 변경
-                            //읽어온 번호 열
-                            //console.info(status);
-                            var tdReadNum = getTd(idx, 2);
-
-                            //console.info("td is" + tdReadNum);
-                            if (tdReadNum.hasChildNodes) {
-                                tdReadNum.removeChild(tdReadNum.firstChild);
-                            }
-                            var tmpCellText1 = document.createTextNode(status != "" ? status : "읽어오지 못하였습니다.");
-                            tdReadNum.appendChild(tmpCellText1);
-
-
-                            // 삭제 버튼 열
-                            var tdDel = getTd(idx, 4);
-                            //console.info("td is" + tdReadNum);
-                            if (tdDel.hasChildNodes) {
-                                tdDel.removeChild(tdDel.firstChild);
-                            }
-                            var tmpCellTex2 = document.createTextNode(status != "" ? "작업완료" : "오류발생");
-                            tdDel.appendChild(tmpCellTex2);
-                            // 파일명 변경 열
-                            var tdChangedName = getTd(idx, 3);
-                            var fileType;
-                            var fileName;
-                            if (status != "") {
-                                fileType = getTd(idx, 1).innerHTML.split(".")[1];
-                                fileName = getTd(idx, 2).innerHTML + "." + fileType;
-                            } else {
-                                fileName = getTd(idx, 1).innerHTML;
-                            }
-
-
-                            var tmpCellTex3 = document.createTextNode(fileName);
-                            tdChangedName.appendChild(tmpCellTex3);
-
-
                             finishQueue.enqueue(1);
-                            resolve("complete");
-
+                        resolve("complete");
+                            
+                        }else{
+                            startQueue.enqueue([file, idx]);
+                            reject("not found");
                         }
+                        
+
+
                     },
                     processData: false,
                     contentType: false,

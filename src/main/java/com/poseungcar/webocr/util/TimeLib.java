@@ -25,8 +25,19 @@ public class TimeLib {
         return currentTime;
         
     }
+    public static String getCurrTime(){
+        Date dt = new java.util.Date();
+
+        SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm:ss.SSS");
+
+        String currentTime = sdf.format(dt);
+
+        return currentTime;
+        
+    }
     public static void main(String[] args) {
         System.out.println(TimeLib.getCurrDateTime());
+        System.out.println(TimeLib.getCurrTime());
     }
     
 

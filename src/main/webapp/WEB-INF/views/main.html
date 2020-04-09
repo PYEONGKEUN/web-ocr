@@ -389,25 +389,28 @@
             }
             isProgress = true;
             remainTask = len;
-            asyncImgs(len);
-            alert("작업을 시작했습니다.");
-            intervalId = setInterval(checkProcess, 100);
-        }
-
-        async function asyncImgs(len) {
+            //작업전 작업해야할 목록 작성
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
                 // html element 노드는 1 부터 시작
                 startQueue.enqueue([FILE_LIST[i], i + 1]);
             }
-            while (startQueue.hasData()) {
-                var jobs = startQueue.dequeue();
-                sendFile(jobs[0], jobs[1]);
-                jobs = startQueue.dequeue();
-                sendFile(jobs[0], jobs[1]);
-                jobs = startQueue.dequeue();
-                sendFile(jobs[0], jobs[1]);
-                jobs = startQueue.dequeue();
+            //10ms 후 4개의 작업 동시 시작
+            setTimeout(function(){asyncImgs()},10);
+            setTimeout(function(){asyncImgs()},10);
+            setTimeout(function(){asyncImgs()},10);
+            setTimeout(function(){asyncImgs()},10);
+
+
+            asyncImgs();
+            alert("작업을 시작했습니다.");
+            intervalId = setInterval(checkProcess, 100);
+        }
+
+        async function asyncImgs() {
+            var jobs;
+            while ((jobs = startQueue.dequeue()) != undefined) {
+  
                 await sendFile(jobs[0], jobs[1]);
             }
         }
@@ -470,13 +473,13 @@
 
                         if (status != 'error') {
                             finishQueue.enqueue(1);
-                        resolve("complete");
-                            
-                        }else{
+                            resolve("complete");
+
+                        } else {
                             startQueue.enqueue([file, idx]);
                             reject("not found");
                         }
-                        
+
 
 
                     },
@@ -639,4 +642,3 @@
 </body>
 
 </html>
-

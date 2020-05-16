@@ -11,14 +11,14 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.poseungcar.webocr.config.RootConfig;
+import com.poseungcar.webocr.config.DataSourceConfig;
 import com.poseungcar.webocr.service.OcrService;
 
 
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {RootConfig.class})
+@ContextConfiguration(classes= {DataSourceConfig.class})
 public class OCRServiceTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(OCRServiceTest.class);

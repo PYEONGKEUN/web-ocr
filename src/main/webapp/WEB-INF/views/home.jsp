@@ -402,9 +402,7 @@
             setTimeout(function(){asyncImgs()},10);
             setTimeout(function(){asyncImgs()},10);
             setTimeout(function(){asyncImgs()},10);
-
-
-            asyncImgs();
+            
             alert("작업을 시작했습니다.");
             intervalId = setInterval(checkProcess, 100);
         }

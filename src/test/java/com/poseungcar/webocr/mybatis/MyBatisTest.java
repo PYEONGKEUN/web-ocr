@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.poseungcar.webocr.config.RootConfig;
+import com.poseungcar.webocr.config.DataSourceConfig;
 
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {RootConfig.class})
+@ContextConfiguration(classes= {DataSourceConfig.class})
 public class MyBatisTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(MyBatisTest.class);

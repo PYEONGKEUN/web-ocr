@@ -44,30 +44,32 @@ public class OcrServiceImpl implements OcrService {
 		// TODO Auto-generated method stub
 		logger.info("["+TimeLib.getCurrTime()+"] ---detectText Start---");		
 
-		// 같은 해시값을 가진 파일을 찾음
-		OCR findOCR =OCR.builder()
-				.ocr_hash(fileHash)
-				.build(); 
+//		// 같은 해시값을 가진 파일을 찾음
+//		OCR findOCR =OCR.builder()
+//				.ocr_hash(fileHash)
+//				.build(); 
+//		
+//		List<OCR> findedocrs = ocrDao.select(findOCR,0,1);
+//		// 같은 해시값을 가진 파일지 존재한다면 OCR 결과를 가져와서 저장후 종료
+//		if(findedocrs.size() >= 1) {			
+//			
+//			OCR ocr = OCR.builder()
+//					.usr_id(id)
+//					.ocr_datetime(TimeLib.getCurrDateTime())
+//					.ocr_fileName(fileName)
+//					.ocr_filePath(filePath)
+//					.ocr_ocrResult(findedocrs.get(0).getOcr_ocrResult().toString())
+//					.ocr_hash(fileHash)
+//					.build();
+//
+//			//logger.debug(ocr.toString());
+//
+//			ocrDao.insert(ocr);
+//			logger.info("["+TimeLib.getCurrTime()+"] ---detectText End---");	
+//			return true;
+//		}
 		
-		List<OCR> findedocrs = ocrDao.select(findOCR,0,1);
-		// 같은 해시값을 가진 파일지 존재한다면 OCR 결과를 가져와서 저장후 종료
-		if(findedocrs.size() >= 1) {			
-			
-			OCR ocr = OCR.builder()
-					.usr_id(id)
-					.ocr_datetime(TimeLib.getCurrDateTime())
-					.ocr_fileName(fileName)
-					.ocr_filePath(filePath)
-					.ocr_ocrResult(findedocrs.get(0).getOcr_ocrResult().toString())
-					.ocr_hash(fileHash)
-					.build();
-
-			//logger.debug(ocr.toString());
-
-			ocrDao.insert(ocr);
-			logger.info("["+TimeLib.getCurrTime()+"] ---detectText End---");	
-			return true;
-		}
+		
 		logger.info("["+TimeLib.getCurrTime()+"] ---Google Vision API Start---");	
 		//GOOGLE VISION API에 서비스를 요청하기 위한  객체
 		List<AnnotateImageRequest> requests = new ArrayList<>();

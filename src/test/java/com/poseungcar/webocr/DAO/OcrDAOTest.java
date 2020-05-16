@@ -18,13 +18,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.poseungcar.webocr.DTO.OCR;
 import com.poseungcar.webocr.DTO.OCR.OCRBuilder;
-import com.poseungcar.webocr.config.RootConfig;
+import com.poseungcar.webocr.config.DataSourceConfig;
 import com.poseungcar.webocr.util.TimeLib;
 
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes= {RootConfig.class})
+@ContextConfiguration(classes= {DataSourceConfig.class})
 public class OcrDAOTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(OcrDAOTest.class);

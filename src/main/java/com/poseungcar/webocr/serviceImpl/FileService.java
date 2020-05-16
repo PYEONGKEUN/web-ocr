@@ -1,4 +1,7 @@
-package com.poseungcar.webocr.serviceImpl;
+
+
+
+ package com.poseungcar.webocr.serviceImpl;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -113,7 +116,7 @@ public class FileService implements IFileService{
 //			//전체 URL
 //			String fileURL = host + getContextPath+uploadsUriPath +"/"+userId+"/"+file.getOriginalFilename();
 //			logger.info("return : "+fileURL);
-			
+			   
 
 			result.put("fileName", file.getOriginalFilename());
 			result.put("filePath", saveFilePath.getPath());

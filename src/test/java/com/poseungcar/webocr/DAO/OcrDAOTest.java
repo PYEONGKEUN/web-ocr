@@ -85,7 +85,7 @@ public class OcrDAOTest {
 	@Test
 	public void selectTest2() throws Exception {
 //		logger.info(OCR.builder().build().toString());
-		List<OCR> ocrs = ocrDAO.select(OCR.builder().build(),0,100);
+		List<OCR> ocrs = ocrDAO.select(OCR.builder().build(),0,5);
 		Gson gson = new Gson();	
 		String detectedVoucherNum;
 		String json;
@@ -96,24 +96,43 @@ public class OcrDAOTest {
 			List<EntityAnnotation> annotations = gson.fromJson(json, new TypeToken<List<EntityAnnotation>>(){}.getType());
 			//logger.info(annotations.toString());
 
+			
+			
+			
 			//해당 엔티티어노테이션에 
 			String allTxt = annotations.get(0).getDescription();
-			allTxt = allTxt.replaceAll(" ", "");
-			allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
-			//logger.info(allTxt);
+			
+			//일단 그냥 검색
 			Pattern  regExPattern = Pattern.compile("[0-9]{1}-[0-9]{6}-[0-9]{5}");
 			Matcher m = regExPattern.matcher(allTxt);
 			
 			if(m.find())
 	        {
+				logger.info(m.toString());
 				detectedVoucherNum = m.group();
 	        }
 	        else
-	        {
-	        	detectedVoucherNum = null;
+	        {	
+	        	//못찾았다면
+	    		// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
+	    		allTxt = allTxt.replaceAll(" ", "");
+	    		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
+	    		logger.info(allTxt);
+	    		m = regExPattern.matcher(allTxt);
+	    		if(m.find())
+	            {
+	    			logger.info(m.toString());
+	    			detectedVoucherNum = m.group();
+	            }
+	    		else {
+	    			detectedVoucherNum = null;
+	    		}
+	    		
+	    		
+	        	
 	        }
-			
-			logger.info("영수증 번호는 "+detectedVoucherNum+"입니다.\n----------------------------");
+			logger.info(m.toString());
+			logger.info(ocr.getOcr_fileName()+ "영수증 번호는 "+detectedVoucherNum+"입니다.\n----------------------------");
 		}
 	}
 	

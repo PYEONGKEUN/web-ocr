@@ -27,6 +27,7 @@ import com.google.cloud.vision.v1.Feature.Type;
 import com.google.protobuf.ByteString;
 import com.poseungcar.webocr.DAO.OcrDAO;
 import com.poseungcar.webocr.DTO.OCR;
+import com.poseungcar.webocr.config.StaticValues;
 import com.poseungcar.webocr.service.OcrService;
 import com.poseungcar.webocr.util.TimeLib;
 
@@ -216,7 +217,8 @@ public class OcrServiceImpl implements OcrService {
 		// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
 		allTxt = allTxt.replaceAll(" ", "");
 		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
-		Pattern  regExPattern = Pattern.compile("[0-9]{1}-[0-9]{6}-[0-9]{5}");
+		
+		Pattern  regExPattern = Pattern.compile(StaticValues.REGEX_PATTERN_VOUCHER_NUM);
 		Matcher m = regExPattern.matcher(allTxt);
 		
 		if(m.find())
@@ -225,7 +227,7 @@ public class OcrServiceImpl implements OcrService {
         }
         else
         {	
-        	//못찾는다면 null을 리턴
+        	//못찾는다면 위치기반으로 탐색
         	detectedVoucherNum = getVoucherNum(id,fileName,filePath);
         }
 		logger.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);	

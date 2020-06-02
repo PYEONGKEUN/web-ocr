@@ -50,6 +50,7 @@ public class UploadController {
 		Map<String,Object> uploadResult;
 
 		uploadResult= fileService.imgUpload(file, model, session, request, response);
+		
 		ocrService.detectText(
 				"default", 
 				uploadResult.get("fileName").toString(), 

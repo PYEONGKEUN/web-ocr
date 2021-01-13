@@ -9,7 +9,7 @@ import com.poseungcar.webocr.DTO.OCR;
 public interface OcrDAO {
 
 	public List<OCR> selectAll(OCR ocr);
-	public List<OCR> select(@Param("ocr") OCR ocr,@Param("offset") int offset, @Param("limit") int limit);	
+	public List<OCR> select(@Param("ocr") OCR ocr);
 	public int update(OCR ocr);
 	public int insert(OCR ocr);
 }

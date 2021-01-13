@@ -85,7 +85,7 @@ public class OcrDAOTest {
 	@Test
 	public void selectTest2() throws Exception {
 //		logger.info(OCR.builder().build().toString());
-		List<OCR> ocrs = ocrDAO.select(OCR.builder().build(),0,5);
+		List<OCR> ocrs = ocrDAO.select(OCR.builder().build());
 		Gson gson = new Gson();	
 		String detectedVoucherNum;
 		String json;

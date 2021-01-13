@@ -78,12 +78,50 @@ public class UploadController {
 		}else{ 
 			logger.info("파일이 존재하지 않습니다."); 
 		}
-   
-		
-		
-		return result;
-
+   		return result;
 	}
 
+	@ResponseBody
+	@RequestMapping(value="big/uploadimg.action", method=RequestMethod.POST, produces="text/plain;charset=utf-8")
+	public String singleFileUploadBigNum(
+			@RequestParam("mediaFile") MultipartFile file,
+			HttpSession session,
+			Model model,
+			HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		//MultipartFile는 자바스크립트로 File객체와 Bloc 객체를 받을수 있다.
+		Map<String,Object> uploadResult;
+
+		uploadResult= fileService.imgUpload(file, model, session, request, response);
+
+		ocrService.detectText(
+				"default",
+				uploadResult.get("fileName").toString(),
+				uploadResult.get("filePath").toString(),
+				uploadResult.get("fileHash").toString());
+
+		String result = ocrService.getBigVoucherNumByRegEx(
+				"default",
+				uploadResult.get("fileName").toString(),
+				uploadResult.get("filePath").toString());
+
+// 클라이언트 단에서는 ""  값으로 에러 처리중
+//		if(result == null) {
+//			result = "error";
+//		}
+
+		File delFile = new File(uploadResult.get("filePath").toString());
+		if( delFile.exists() ){
+			if(delFile.delete()){
+				logger.info("파일삭제 성공");
+			}
+			else{
+				logger.info("파일삭제 실패");
+			}
+		}else{
+			logger.info("파일이 존재하지 않습니다.");
+		}
+		return result;
+	}
 
 }

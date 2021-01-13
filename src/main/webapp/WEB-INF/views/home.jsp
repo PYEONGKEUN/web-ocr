@@ -82,7 +82,7 @@
                 <div class="content">
                     <div class="row">
                         <div class="col">
-                            <h2>영수증 증표번호 자동인식</h2>
+                            <h2>영수증 증표번호 자동인식</h2> <a href="./big"><button class="btn btn-danger" type="button">영수증 가장 큰번호 인식 바로가기</button></a>
                         </div>
                     </div>
                     <hr />

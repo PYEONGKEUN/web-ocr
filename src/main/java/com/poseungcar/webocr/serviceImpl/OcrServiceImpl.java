@@ -142,7 +142,7 @@ public class OcrServiceImpl implements OcrService {
 		//결과물을 담을 변수
 		String detectedVoucherNum = "";
 
-		List<OCR> ocrs = ocrDao.select(findOcr,0,1);
+		List<OCR> ocrs = ocrDao.select(findOcr);
 		
 		if(ocrs.size() == 0) {
 			logger.info("OCR result is not found.");
@@ -196,7 +196,7 @@ public class OcrServiceImpl implements OcrService {
 		//결과물을 담을 변수
 		String detectedVoucherNum = "";
 
-		List<OCR> ocrs = ocrDao.select(findOcr,0,1);
+		List<OCR> ocrs = ocrDao.select(findOcr);
 		
 		if(ocrs.size() == 0) {
 			logger.info("OCR result is not found.");
@@ -235,6 +235,59 @@ public class OcrServiceImpl implements OcrService {
 		return detectedVoucherNum;
 	}
 
+	@Override
+	public String getBigVoucherNumByRegEx(String id, String fileName, String filePath) {
+		logger.info("["+TimeLib.getCurrTime()+"] ---getBigVoucherNumByRegEx Start---");
+		//번호를 찾을 대상 OCR
+		OCR findOcr = OCR.builder()
+				.usr_id(id)
+				.ocr_fileName(fileName)
+				.ocr_filePath(filePath)
+				.build();
+
+		//결과물을 담을 변수
+		String detectedVoucherNum = "";
+
+		List<OCR> ocrs = ocrDao.select(findOcr);
+
+		if(ocrs.size() == 0) {
+			logger.info("OCR result is not found.");
+			return null;
+		}
+
+		//하나만 고르기때문에 가장 첫번째
+		String json = ocrs.get(0).getOcr_ocrResult();
+
+
+		Gson gson = new Gson();
+		//json 형식의 String에서 List<EntityAnnotation>객체를 생성
+		List<EntityAnnotation> annotations = gson.fromJson(json, new TypeToken<List<EntityAnnotation>>(){}.getType());
+
+		//해당 엔티티어노테이션에
+		String allTxt = annotations.get(0).getDescription();
+
+		// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
+		allTxt = allTxt.replaceAll(" ", "");
+		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
+
+		Pattern  regExPattern = Pattern.compile(StaticValues.REGEX_PATTERN_BIG_VOUCHER_NUM);
+		Matcher m = regExPattern.matcher(allTxt);
+
+		if(m.find())
+		{
+			StringBuffer origin = new StringBuffer(m.group());
+			detectedVoucherNum = origin.insert(5," ").toString();
+
+		}
+		else
+		{
+			//못찾는다면 위치기반으로 탐색
+			detectedVoucherNum = "FFFFF FFFFF";
+		}
+		logger.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
+		logger.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");
+		return detectedVoucherNum;
+	}
 
 
 }

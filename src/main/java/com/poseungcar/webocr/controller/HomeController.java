@@ -49,5 +49,19 @@ public class HomeController {
 		
 		return "links";
 	}
+	// 영수증에서 큰 번호 읽어오기
+	@RequestMapping(value = "/big", method = RequestMethod.GET)
+	public String detectBigNum(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+
+		String formattedDate = dateFormat.format(date);
+
+		model.addAttribute("serverTime", formattedDate );
+
+		return "detectBigNum";
+	}
 	
 }

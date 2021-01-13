@@ -30,7 +30,6 @@
       <if test="ocr.ocr_ocrResult != null">AND ocr_ocrResult=#{ocr.ocr_ocrResult}</if>
       <if test="ocr.ocr_hash != null">AND ocr_hash=#{ocr.ocr_hash}</if>
     </trim>
-	LIMIT #{offset}, #{limit}
   </select>
   
 

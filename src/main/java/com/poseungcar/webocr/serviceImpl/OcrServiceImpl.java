@@ -276,13 +276,13 @@ public class OcrServiceImpl implements OcrService {
 		if(m.find())
 		{
 			StringBuffer origin = new StringBuffer(m.group());
-			detectedVoucherNum = origin.insert(5," ").toString();
+			detectedVoucherNum = origin.insert(5,"_").toString();
 
 		}
 		else
 		{
 			//못찾는다면 위치기반으로 탐색
-			detectedVoucherNum = "FFFFF FFFFF";
+			detectedVoucherNum = "FFFFF_FFFFF";
 		}
 		logger.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
 		logger.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");

@@ -206,12 +206,9 @@
             return year + '_' + month + '_' + day + "_" + hour + "" + min + "" + sec;
         }
 
-
         //엑셀 다운
         $("#downExcel").click(
             function() {
-
-
 
                 var date = new Date();
                 var title = getFormatDate(date);
@@ -219,8 +216,6 @@
             }
         );
         var FILE_LIST = new Array();
-
-
 
         function resetFiles() {
             if (hasDownoad) {
@@ -240,68 +235,22 @@
             isProgress = false;
         }
 
-        //        var resizeImage = function(settings) {
-        //            var file = settings.file;
-        //            var reader = new FileReader();
-        //            var image = new Image();
-        //            var canvas = document.createElement('canvas');
-        //            var dataURItoBlob = function(dataURI) {
-        //                var bytes = dataURI.split(',')[0].indexOf('base64') >= 0 ?
-        //                    atob(dataURI.split(',')[1]) :
-        //                    unescape(dataURI.split(',')[1]);
-        //                var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
-        //                var max = bytes.length;
-        //                var ia = new Uint8Array(max);
-        //                for (var i = 0; i < max; i++)
-        //                    ia[i] = bytes.charCodeAt(i);
-        //                return new Blob([ia], {
-        //                    type: 'image/jpeg'
-        //                });
-        //            };
-        //            var resize = function() {
-        //                var width = 2478;
-        //                var height = 1746;
-        //
-        //                canvas.width = width;
-        //                canvas.height = height;
-        //                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-        //                var dataUrl = canvas.toDataURL('image/jpeg');
-        //                return dataURItoBlob(dataUrl);
-        //            };
-        //            return new Promise(function(ok, no) {
-        //                if (!file.type.match(/image.*/)) {
-        //                    no(new Error("Not an image"));
-        //                    return;
-        //                }
-        //                reader.onload = function(readerEvent) {
-        //                    image.onload = function() {
-        //                        return ok(resize());
-        //                    };
-        //                    image.src = readerEvent.target.result;
-        //                };
-        //                reader.readAsDataURL(file);
-        //            });
-        //        };
-
 
         function onChangeSelectedImgs() {
             //function() {
-            //console.log("img in changed");
+            ////("img in changed");
             var files = document.getElementById("selectedImgs").files;
             var fileLen = files.length;
-            //console.log(files);
+            ////(files);
             var dataTable = document.getElementById('dataTable');
 
-
-
-            //console.log(dataTable);
+            ////(dataTable);
             //}
             // 파일을 읽고 dataTable에 정보 추가
             function readAndAdd(file) {
                 // `file.name` 형태의 확장자 규칙에 주의하세요
                 if (/\.(jpe?g|png|gif)$/i.test(file.name)) {
-                    //console.log(FILE_LIST);
-
+                    //(FILE_LIST);
 
                     var reader = new FileReader();
 
@@ -337,7 +286,6 @@
                         tmpCell3.appendChild(tmpCellText3);
                         tmpRow.appendChild(tmpCell3);
 
-
                         var tmpCell4 = document.createElement("td");
                         var buttonDel = document.createElement("button");
                         buttonDel.innerHTML = "삭제";
@@ -355,19 +303,14 @@
                         tmpRow.appendChild(tmpCell4);
 
                         dataTable.appendChild(tmpRow);
-                        //console.log(tmpRow);
+                        ////(tmpRow);
                     }, false);
                     reader.readAsDataURL(file);
                     FILE_LIST.push(file);
-
-
                 }
-
-
             }
 
-
-            // files 가 false가 아니라면 
+            // files 가 false가 아니라면
             if (files) {
                 [].forEach.call(files, readAndAdd);
                 alert("파일 " + files.length + "개가 추가되었습니다.");
@@ -395,7 +338,7 @@
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
                 // html element 노드는 1 부터 시작
-                startQueue.enqueue([FILE_LIST[i], i + 1]);
+                startQueue.enqueue([FILE_LIST[i], i+1]);
             }
             //10ms 후 4개의 작업 동시 시작
             setTimeout(function(){asyncImgs()},10);
@@ -425,7 +368,7 @@
                 formData.append('mediaFile', file);
 
                 for (var pair of formData.entries()) {
-                    //console.log(pair[0] + ', ' + pair[1]);
+                    ////(pair[0] + ', ' + pair[1]);
                 }
                 $.ajax({
                     type: 'post',
@@ -436,7 +379,7 @@
 
                         // 요청 결과로 td 변경
                         //읽어온 번호 열
-                        //console.info(status);
+                        console.info(status + idx);
                         var tdReadNum = getTd(idx, 2);
 
                         //console.info("td is" + tdReadNum);
@@ -445,7 +388,6 @@
                         }
                         var tmpCellText1 = document.createTextNode(status != "error" ? status : "읽어오지 못하였습니다.");
                         tdReadNum.appendChild(tmpCellText1);
-
 
                         // 삭제 버튼 열
                         var tdDel = getTd(idx, 4);
@@ -466,35 +408,26 @@
                             fileName = getTd(idx, 1).innerHTML;
                         }
 
-
                         var tmpCellTex3 = document.createTextNode(fileName);
                         tdChangedName.appendChild(tmpCellTex3);
-
 
                         if (status != 'error') {
                             finishQueue.enqueue(1);
                             resolve("complete");
-
                         } else {
                             startQueue.enqueue([file, idx]);
                             reject("not found");
                         }
-
-
-
                     },
                     processData: false,
                     contentType: false,
                     // 아래 error 함수를 이용해 콘솔창으로 디버깅을 한다.
                     error: function(jqXHR, textStatus, errorThrown) {
                         startQueue.enqueue([file, idx]);
-                        //console.log(jqXHR.responseText);
+                        ////(jqXHR.responseText);
                     }
                 });
-
             });
-
-
         }
 
         function getTd(rowIdx, cellIdx) {
@@ -543,21 +476,15 @@
                 thd_td[thd_td.length - 1].removeChild(thd_td[thd_td.length - 1].firstChild);
                 var tmpStr = "";
                 if (i == 0) {
-
                     tmpStr = "날짜";
-
                 } else {
                     // 파일 명에서 날짜 분리 SCAN_20200302_173106407 -> 20200302
                     tmpStr = thd_td[0].innerHTML.split("_")[1];
                     tmpStr = tmpStr.substring(0,4) +"-"+tmpStr.substring(4,6)+"-"+tmpStr.substring(6);
-
                 }
                 console.info(tmpStr);
                 var tmpText = document.createTextNode(tmpStr);
                 thd_td[thd_td.length - 1].appendChild(tmpText);
-
-
-
             }
             exportTable.find('input').each(function(index, elem) {
                 $(elem).remove();
@@ -589,28 +516,8 @@
                 document.body.removeChild(elem);
             }
             // 이미지 다운로드
-
-
             delayDownloadImg();
         }
-
-        //        async function taskDownloagImg(i) {
-        //            
-        //            return new Pormise((resolve, reject)=>{
-        //                resolve();
-        //            }
-        //            
-        //            
-        //            );
-        //            var imgName = getTd(i + 1, 3).innerHTML;
-        //            var elem = window.document.createElement('a');
-        //            elem.href = window.URL.createObjectURL(FILE_LIST[i]);
-        //            elem.download = imgName;
-        //            document.body.appendChild(elem);
-        //            elem.click();
-        //            document.body.removeChild(elem);
-        //
-        //        }
 
         function downloagImg(i) {
             return new Promise(function(resolve, reject) {
@@ -626,8 +533,6 @@
                     resolve("complete");
                 }, WAIT_TIME);
             });
-
-
         }
 
         async function delayDownloadImg() {
@@ -635,10 +540,8 @@
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
                 await downloagImg(i);
-
             }
         }
-
     </script>
 </body>
 

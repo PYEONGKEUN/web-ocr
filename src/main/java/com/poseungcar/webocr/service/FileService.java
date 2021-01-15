@@ -1,6 +1,7 @@
 package com.poseungcar.webocr.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 
-public interface IFileService{
+public interface FileService {
 
 	
 	public Map<String, Object> imgUpload(		
@@ -20,8 +21,7 @@ public interface IFileService{
 		HttpSession session,
 		HttpServletRequest request,
 		HttpServletResponse response) throws IOException;
-	
-	
+
 	public String getFilename(String id, String uuid);
 	
 }

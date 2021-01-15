@@ -16,7 +16,6 @@
             height: 100%;
             overflow: hidden;
         }
-
         body {
             margin: 0;
             padding: 0;
@@ -28,27 +27,22 @@
             font-family: "Luna";
             background: #454c55;
         }
-
         .content {
 
             background: white;
             padding: 30px;
             border-radius: 5px;
         }
-
         .hide {
             display: none;
         }
-
         .thumbnail {
             width: 180px;
             height: auto;
         }
-
         #selectedImgs {
             display: none;
         }
-
         #myBar {
             width: 0%;
             height: 40px;
@@ -59,7 +53,6 @@
             /* To center it vertically */
             color: white;
         }
-
     </style>
     <script>
         var agent = navigator.userAgent.toLowerCase();
@@ -142,7 +135,6 @@
                 return this._arr.shift();
             }
             hasData() {
-
                 if (this._arr.length > 0) {
                     return true;
                 } else {
@@ -206,21 +198,15 @@
             return year + '_' + month + '_' + day + "_" + hour + "" + min + "" + sec;
         }
 
-
         //엑셀 다운
         $("#downExcel").click(
             function() {
-
-
-
                 var date = new Date();
                 var title = getFormatDate(date);
                 fnExcelReport("totalTable", title);
             }
         );
         var FILE_LIST = new Array();
-
-
 
         function resetFiles() {
             if (hasDownoad) {
@@ -240,59 +226,13 @@
             isProgress = false;
         }
 
-        //        var resizeImage = function(settings) {
-        //            var file = settings.file;
-        //            var reader = new FileReader();
-        //            var image = new Image();
-        //            var canvas = document.createElement('canvas');
-        //            var dataURItoBlob = function(dataURI) {
-        //                var bytes = dataURI.split(',')[0].indexOf('base64') >= 0 ?
-        //                    atob(dataURI.split(',')[1]) :
-        //                    unescape(dataURI.split(',')[1]);
-        //                var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
-        //                var max = bytes.length;
-        //                var ia = new Uint8Array(max);
-        //                for (var i = 0; i < max; i++)
-        //                    ia[i] = bytes.charCodeAt(i);
-        //                return new Blob([ia], {
-        //                    type: 'image/jpeg'
-        //                });
-        //            };
-        //            var resize = function() {
-        //                var width = 2478;
-        //                var height = 1746;
-        //
-        //                canvas.width = width;
-        //                canvas.height = height;
-        //                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-        //                var dataUrl = canvas.toDataURL('image/jpeg');
-        //                return dataURItoBlob(dataUrl);
-        //            };
-        //            return new Promise(function(ok, no) {
-        //                if (!file.type.match(/image.*/)) {
-        //                    no(new Error("Not an image"));
-        //                    return;
-        //                }
-        //                reader.onload = function(readerEvent) {
-        //                    image.onload = function() {
-        //                        return ok(resize());
-        //                    };
-        //                    image.src = readerEvent.target.result;
-        //                };
-        //                reader.readAsDataURL(file);
-        //            });
-        //        };
-
-
-        function onChangeSelectedImgs() {
+          function onChangeSelectedImgs() {
             //function() {
             //console.log("img in changed");
             var files = document.getElementById("selectedImgs").files;
             var fileLen = files.length;
             //console.log(files);
             var dataTable = document.getElementById('dataTable');
-
-
 
             //console.log(dataTable);
             //}
@@ -301,7 +241,6 @@
                 // `file.name` 형태의 확장자 규칙에 주의하세요
                 if (/\.(jpe?g|png|gif)$/i.test(file.name)) {
                     //console.log(FILE_LIST);
-
 
                     var reader = new FileReader();
 
@@ -359,15 +298,9 @@
                     }, false);
                     reader.readAsDataURL(file);
                     FILE_LIST.push(file);
-
-
                 }
-
-
             }
-
-
-            // files 가 false가 아니라면 
+            // files 가 false가 아니라면
             if (files) {
                 [].forEach.call(files, readAndAdd);
                 alert("파일 " + files.length + "개가 추가되었습니다.");
@@ -395,13 +328,14 @@
             for (var i = 0; i < len; i++) {
                 //console.info(FILE_LIST[i]);
                 // html element 노드는 1 부터 시작
-                startQueue.enqueue([FILE_LIST[i], i + 1]);
+                startQueue.enqueue([FILE_LIST[i], i+1]);
+                console.info(FILE_LIST);
             }
             //10ms 후 4개의 작업 동시 시작
-            setTimeout(function(){asyncImgs()},10);
-            setTimeout(function(){asyncImgs()},10);
-            setTimeout(function(){asyncImgs()},10);
-            setTimeout(function(){asyncImgs()},10);
+            setTimeout(function(){asyncImgs()},1000);
+            setTimeout(function(){asyncImgs()},1000);
+            setTimeout(function(){asyncImgs()},1000);
+            setTimeout(function(){asyncImgs()},1000);
             
             alert("작업을 시작했습니다.");
             intervalId = setInterval(checkProcess, 100);
@@ -410,7 +344,6 @@
         async function asyncImgs() {
             var jobs;
             while ((jobs = startQueue.dequeue()) != undefined) {
-  
                 await sendFile(jobs[0], jobs[1]);
             }
         }
@@ -418,38 +351,36 @@
         //이미지 업로드 AJAX
         // 이미지 업로드가 session["mem_id"]에 종속됨 없으면 업로드 불가
         function sendFile(file, idx) {
+            //console.log(pair[0] + ', ' + pair[1]);
+
             return new Promise((resolve, reject) => {
-
-                console.info("sendFile : " + idx + "--" + new Date());
                 var formData = new FormData();
-                formData.append('mediaFile', file);
 
-                for (var pair of formData.entries()) {
-                    //console.log(pair[0] + ', ' + pair[1]);
-                }
+                formData.append('mediaFile', file);
+                // for (var pair of formData.entries()) {
+                //
+                // }
                 $.ajax({
                     type: 'post',
                     url: './big/uploadimg.action',
                     data: formData,
                     success: function(status) {
-                        console.info(status);
-
                         // 요청 결과로 td 변경
                         //읽어온 번호 열
-                        console.info(status);
+                        console.info("sendFile : " + idx + " -- " + status);
                         var tdReadNum = getTd(idx, 2);
+                        // console.info("td is" + tdReadNum);
 
-                        console.info("td is" + tdReadNum);
                         if (tdReadNum.hasChildNodes) {
                             tdReadNum.removeChild(tdReadNum.firstChild);
                         }
                         var tmpCellText1 = document.createTextNode(status != "error" ? status : "읽어오지 못하였습니다.");
                         tdReadNum.appendChild(tmpCellText1);
 
-
                         // 삭제 버튼 열
                         var tdDel = getTd(idx, 4);
-                        console.info("td is" + tdReadNum);
+                        // console.info("td is");
+                        // console.info(tdReadNum);
                         if (tdDel.hasChildNodes) {
                             tdDel.removeChild(tdDel.firstChild);
                         }
@@ -479,19 +410,15 @@
                             startQueue.enqueue([file, idx]);
                             reject("not found");
                         }
-
-
-
                     },
                     processData: false,
                     contentType: false,
                     // 아래 error 함수를 이용해 콘솔창으로 디버깅을 한다.
                     error: function(jqXHR, textStatus, errorThrown) {
-                        startQueue.enqueue([file, idx]);
+                        // startQueue.enqueue([file, idx]);
                         console.log(jqXHR.responseText);
                     }
                 });
-
             });
 
 

@@ -54,18 +54,7 @@ public class DataSourceConfig {
 		config.setDriverClassName(dbDriverClassName);
 		config.setJdbcUrl(dbURL); 
 		config.setUsername(dbUserName); 
-		config.setPassword(dbPassword); 
-		config.addDataSourceProperty("cachePrepStmts", "true");
-		config.addDataSourceProperty("prepStmtCacheSize", "250");
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-		config.addDataSourceProperty("useServerPrepStmts", "true");
-		config.addDataSourceProperty("useLocalSessionState", "true");
-		config.addDataSourceProperty("rewriteBatchedStatements", "true");
-		config.addDataSourceProperty("cacheResultSetMetadata", "true");
-		config.addDataSourceProperty("cacheServerConfiguration", "true");
-		config.addDataSourceProperty("elideSetAutoCommits", "true");
-		config.addDataSourceProperty("maintainTimeStats", "true");
-		config.setMinimumIdle(20);
+		config.setPassword(dbPassword);
 		// jdbc 4 부터 필요 없음 config.setConnectionTestQuery("select 1");
 		
 		

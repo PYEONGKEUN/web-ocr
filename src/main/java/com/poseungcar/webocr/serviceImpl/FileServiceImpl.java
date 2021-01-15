@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,20 +16,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.poi.ss.util.ImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.poseungcar.webocr.DAO.OcrDAO;
-import com.poseungcar.webocr.DTO.OCR;
-import com.poseungcar.webocr.service.IFileService;
-import com.poseungcar.webocr.service.OcrService;
+import com.poseungcar.webocr.service.FileService;
 import com.poseungcar.webocr.util.FileHash;
 import com.poseungcar.webocr.util.ImageTools;
 import com.poseungcar.webocr.util.TimeLib;
@@ -36,9 +32,9 @@ import com.poseungcar.webocr.util.TimeLib;
 
 @Service
 @PropertySource({"classpath:profiles/${spring.profiles.active}/application.properties"})
-public class FileService implements IFileService{
+public class FileServiceImpl implements FileService {
 
-	private static final Logger logger = LoggerFactory.getLogger(FileService.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
 
 	@Value("${imgs.location}")
@@ -51,8 +47,6 @@ public class FileService implements IFileService{
 	
 	
 	final int IMG_WIDTH = 2478, IMG_HEIGHT = 1746; 
-
-
 
 	@Override
 	public Map<String, Object> imgUpload(		
@@ -94,10 +88,7 @@ public class FileService implements IFileService{
 			// image/jpeg 에서 jpeg만 가져오는 작업
 			String fileType = file.getContentType().substring(file.getContentType().indexOf("/")+1);
 			//파일저장
-			
-			
-			
-			
+
 			File saveFilePath = new File(dir.getPath(), UUID.randomUUID().toString()+"."+fileType);
 			
 			BufferedImage bfResizedImg = ImageTools.resize(file.getInputStream(), IMG_WIDTH, IMG_HEIGHT);
@@ -129,8 +120,6 @@ public class FileService implements IFileService{
 			return null;
 		}
 	}
-
-
 
 
 	@Override

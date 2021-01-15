@@ -12,4 +12,5 @@ public interface OcrDAO {
 	public List<OCR> select(@Param("ocr") OCR ocr);
 	public int update(OCR ocr);
 	public int insert(OCR ocr);
+	public int bulkInsert(List<OCR> ocrList);
 }

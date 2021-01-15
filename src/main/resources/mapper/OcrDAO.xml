@@ -52,4 +52,20 @@
     VALUES(#{usr_id}, #{ocr_fileName}, #{ocr_filePath}, #{ocr_datetime}, #{ocr_ocrResult}, #{ocr_hash} )
   </insert>
 
+  <insert id="bulkInsert"  parameterType="java.util.List">
+    INSERT INTO OCR(usr_id, ocr_fileName, ocr_filePath, ocr_datetime, ocr_ocrResult, ocr_hash)
+    VALUES
+           <foreach collection="list" item="item" index="index">
+             <if test="index > 0">,</if>
+             (
+              #{item.usr_id},
+              #{item.ocr_fileName},
+              #{item.ocr_filePath},
+              #{item.ocr_datetime},
+              #{item.ocr_ocrResult},
+              #{item.ocr_hash}
+              )
+           </foreach>
+  </insert>
+
 </mapper>

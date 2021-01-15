@@ -337,12 +337,12 @@
                             // 데이터는 1인텍스부터 시작
                             var idx = dataIdx + 1;
                             var tdReadNum = getTd(idx, 2);
-                            // console.info("td is" + tdReadNum);
-                            // if (tdReadNum.hasChildNodes) {
-                            //     tdReadNum.removeChild(tdReadNum.firstChild);
-                            // }
-                            // var tmpCellText1 = document.createTextNode(status != "" ? data[dataIdx] : "읽어오지 못하였습니다.");
-                            // tdReadNum.appendChild(tmpCellText1);
+                            console.info("td is" + tdReadNum);
+                            if (tdReadNum.hasChildNodes) {
+                                tdReadNum.removeChild(tdReadNum.firstChild);
+                            }
+                            var tmpCellText1 = document.createTextNode(status != "" ? data[dataIdx] : "읽어오지 못하였습니다.");
+                            tdReadNum.appendChild(tmpCellText1);
 
                             // 삭제 버튼 열
                             var tdDel = getTd(idx, 4);

@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.google.gson.Gson;
 import com.poseungcar.webocr.service.FileService;
 import com.poseungcar.webocr.service.OcrService;
 import lombok.extern.log4j.Log4j2;
@@ -48,27 +49,27 @@ public class HomeController {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Locale locale, Model model) {
-		
+
 		Date date = new Date();
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-		
+
 		String formattedDate = dateFormat.format(date);
-		
+
 		model.addAttribute("serverTime", formattedDate );
-		
+
 		return "home";
 	}
 	// 브라우저 다운로드 링크
 	@RequestMapping(value = "/links", method = RequestMethod.GET)
 	public String links(Locale locale, Model model) {
-		
+
 		Date date = new Date();
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
-		
+
 		String formattedDate = dateFormat.format(date);
-		
+
 		model.addAttribute("serverTime", formattedDate );
-		
+
 		return "links";
 	}
 	// 영수증에서 큰 번호 읽어오기
@@ -82,7 +83,7 @@ public class HomeController {
 
 		model.addAttribute("serverTime", formattedDate );
 
-		return "detectBigNumBatch";
+		return "detectBigNum";
 	}
 
 	// 영수증에서 큰 번호 읽어오기 Batch
@@ -131,7 +132,7 @@ public class HomeController {
 	}
 	@ResponseBody
 	@RequestMapping(value="/bigbatch", method=RequestMethod.POST, produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public void getBigNumBatch(
+	public String getBigNumBatch(
 			HttpSession session,
 			Model model,
 			HttpServletRequest request,
@@ -160,35 +161,12 @@ public class HomeController {
 
 			//--- getBigNUmberBatch AND create
 
-
-
 			Map<String, Object> uploadResultItem = null;
 			List<String> bigNumList = new ArrayList<String>();
 			int uploadResultListSize = uploadResultList.size();
 			String tmpBigNum = null;
 
 
-			Sheet sheet = wb.createSheet();
-
-			Row row = null;
-			Cell cell = null;
-
-			// 헤더 설정 첫번째
-			row = sheet.createRow(0);
-			cell = row.createCell(0);
-			cell.setCellValue("불러온 파일");
-			cell = row.createCell(1);
-			cell.setCellValue("읽어온 번호");
-			cell = row.createCell(2);
-			cell.setCellValue("파일명 변경");
-			cell = row.createCell(3);
-			cell.setCellValue("날짜");
-
-			// 날짜구하기
-			String pattern = "yyyy_MM_dd_hhmmss";
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-
-			String date = simpleDateFormat.format(new Date());
 			log.info("uploadResultListSize : "+uploadResultListSize);
 
 			// -- 헤더 이후 두번째 행부터 추가 (실질적인 데이터)
@@ -203,58 +181,21 @@ public class HomeController {
 				if(tmpBigNum == null) tmpBigNum = "FFFFF_FFFFF";
 				log.info(tmpBigNum);
 				// 파일 이름과 ext 구하기
-				String fileName =  uploadResultItem.get("fileName").toString();
-				int pos = fileName.lastIndexOf( "." );
-				String ext = fileName.substring( pos + 1 );
-
-				// 두번째 행부터 추가
-				row = sheet.createRow(i+1);
-				cell = row.createCell(0); // 불러온 파일명
-				cell.setCellValue(fileName);
-				cell = row.createCell(1); // 읽어온 번호
-				cell.setCellValue(tmpBigNum);
-				cell = row.createCell(2); // 파일명 변경
-				cell.setCellValue(tmpBigNum+"."+ext);
-				cell = row.createCell(3); // 날짜
-				cell.setCellValue(date);
-
 				bigNumList.add(tmpBigNum);
 			}
 
 			log.info(bigNumList.toString());
 
-			// download Excel
-
-			response.setHeader("Set-Cookie", "fileDownload=true; path=/");
-			response.setHeader("Content-Disposition", String.format("attachment; filename=\"test.xlsx\""));
-			wb.write(response.getOutputStream());
-
-
-
-			log.info("sucess");
-
-		}catch(Exception e) {
-			response.setHeader("Set-Cookie", "fileDownload=false; path=/");
-			response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-			response.setHeader("Content-Type","text/html; charset=utf-8");
-
-			OutputStream out = null;
-			try {
-				out = response.getOutputStream();
-				byte[] data = new String("fail..").getBytes();
-				out.write(data, 0, data.length);
-			} catch(Exception ignore) {
-				ignore.printStackTrace();
-			} finally {
-				if(out != null) try { out.close(); } catch(Exception ignore) {}
+			Gson gson = new Gson();
+			if(bigNumList.size() > 0){
+				return gson.toJson(bigNumList).toString();
+			}else{
+				return "";
 			}
 
-		} finally {
-
-			// 디스크 적었던 임시파일을 제거합니다.
-			wb.dispose();
-
-			try { wb.close(); } catch(Exception ignore) {}
+		}catch(Exception e) {
+			log.error(e.getMessage());
+			return "";
 		}
 	}
 }

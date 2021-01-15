@@ -123,43 +123,7 @@
         var isFinished = false;
         var isProgress = false;
         var hasDownoad = false;
-        var remainTask = 0;
-        class Queue {
-            constructor() {
-                this._arr = [];
-            }
-            enqueue(item) {
-                this._arr.push(item);
-            }
-            dequeue() {
-                return this._arr.shift();
-            }
-            hasData() {
-                if (this._arr.length > 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-        var finishQueue = new Queue();
-        var startQueue = new Queue();
-        var intervalId = null;
-        var checkProcess = function() {
-            console.info(remainTask);
-            if (remainTask === 0) {
-                clearInterval(intervalId);
-                intervalId = null;
-                isProgress = false;
-                hasDownoad = true;
-                isFinished = true;
-                alert("모든 작업이 완료 되었습니다.");
-            } else {
-                if (finishQueue.hasData()) {
-                    remainTask -= finishQueue.dequeue();
-                }
-            }
-        }
+
         // 이벤트 등록
         $(document).ready(function() {
             // 파일추가 버튼 이벤트
@@ -231,7 +195,7 @@
             //console.log("img in changed");
             var files = document.getElementById("selectedImgs").files;
             var fileLen = files.length;
-            //console.log(files);
+            console.log(files);
             var dataTable = document.getElementById('dataTable');
 
             //console.log(dataTable);
@@ -323,100 +287,99 @@
                 return null;
             }
             isProgress = true;
-            remainTask = len;
+
             //작업전 작업해야할 목록 작성
-            for (var i = 0; i < len; i++) {
-                //console.info(FILE_LIST[i]);
-                // html element 노드는 1 부터 시작
-                startQueue.enqueue([FILE_LIST[i], i+1]);
-                console.info(FILE_LIST);
-            }
+
             //10ms 후 4개의 작업 동시 시작
-            setTimeout(function(){asyncImgs()},1000);
-            setTimeout(function(){asyncImgs()},1000);
-            setTimeout(function(){asyncImgs()},1000);
-            setTimeout(function(){asyncImgs()},1000);
-            
-            alert("작업을 시작했습니다.");
-            intervalId = setInterval(checkProcess, 100);
+            sendFile();
+
+
         }
 
-        async function asyncImgs() {
-            var jobs;
-            while ((jobs = startQueue.dequeue()) != undefined) {
-                await sendFile(jobs[0], jobs[1]);
-            }
-        }
 
         //이미지 업로드 AJAX
         // 이미지 업로드가 session["mem_id"]에 종속됨 없으면 업로드 불가
-        function sendFile(file, idx) {
+        function sendFile() {
             //console.log(pair[0] + ', ' + pair[1]);
-
+            alert("작업을 시작했습니다.");
             return new Promise((resolve, reject) => {
                 var formData = new FormData();
+                var files = FILE_LIST;
+                var fileLen = files.length;
 
-                formData.append('mediaFile', file);
-                // for (var pair of formData.entries()) {
-                //
-                // }
+                console.log(files);
+                for(var i = 0; i < fileLen; i++){
+                    formData.append('file', files[i]);
+                }
+                // // FormData의 value 확인
+                for (let value of formData.values()) {
+                    console.log(value);
+                }
                 $.ajax({
-                    type: 'post',
-                    url: './big/uploadimg.action',
+                    type: "POST",
+                    url: "./bigbatch",
                     data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(status) {
                         // 요청 결과로 td 변경
                         //읽어온 번호 열
-                        console.info("sendFile : " + idx + " -- " + status);
-                        var tdReadNum = getTd(idx, 2);
-                        // console.info("td is" + tdReadNum);
+                        console.info("sendFile : " + status);
 
-                        if (tdReadNum.hasChildNodes) {
-                            tdReadNum.removeChild(tdReadNum.firstChild);
-                        }
-                        var tmpCellText1 = document.createTextNode(status != "error" ? status : "읽어오지 못하였습니다.");
-                        tdReadNum.appendChild(tmpCellText1);
-
-                        // 삭제 버튼 열
-                        var tdDel = getTd(idx, 4);
-                        // console.info("td is");
-                        // console.info(tdReadNum);
-                        if (tdDel.hasChildNodes) {
-                            tdDel.removeChild(tdDel.firstChild);
-                        }
-                        var tmpCellTex2 = document.createTextNode(status != "error" ? "작업완료" : "오류발생");
-                        tdDel.appendChild(tmpCellTex2);
-                        // 파일명 변경 열
-                        var tdChangedName = getTd(idx, 3);
-                        var fileType;
-                        var fileName;
-                        if (status != "error") {
-                            fileType = getTd(idx, 1).innerHTML.split(".")[1];
-                            fileName = getTd(idx, 2).innerHTML + "." + fileType;
-                        } else {
-                            fileName = getTd(idx, 1).innerHTML;
+                        if (status == '') {
+                            alert("작업에 실패했습니다.");
+                            isProgress = false;
+                            reject("fail");
                         }
 
+                        var data = JSON.parse(status);
+                        data.forEach(function (val, dataIdx) {
+                            // 데이터는 1인텍스부터 시작
+                            var idx = dataIdx + 1;
+                            var tdReadNum = getTd(idx, 2);
+                            // console.info("td is" + tdReadNum);
+                            if (tdReadNum.hasChildNodes) {
+                                tdReadNum.removeChild(tdReadNum.firstChild);
+                            }
+                            var tmpCellText1 = document.createTextNode(status != "" ? data[dataIdx] : "읽어오지 못하였습니다.");
+                            tdReadNum.appendChild(tmpCellText1);
 
-                        var tmpCellTex3 = document.createTextNode(fileName);
-                        tdChangedName.appendChild(tmpCellTex3);
+                            // 삭제 버튼 열
+                            var tdDel = getTd(idx, 4);
+                            // console.info("td is");
+                            // console.info(tdReadNum);
+                            if (tdDel.hasChildNodes) {
+                                tdDel.removeChild(tdDel.firstChild);
+                            }
+                            var tmpCellTex2 = document.createTextNode(status != "" ? "작업완료" : "오류발생");
+                            tdDel.appendChild(tmpCellTex2);
+                            // 파일명 변경 열
+                            var tdChangedName = getTd(idx, 3);
+                            var fileType;
+                            var fileName;
+                            if (status != "") {
+                                fileType = getTd(idx, 1).innerHTML.split(".")[1];
+                                fileName = getTd(idx, 2).innerHTML + "." + fileType;
+                            } else {
+                                fileName = getTd(idx, 1).innerHTML;
+                            }
+                            var tmpCellTex3 = document.createTextNode(fileName);
+                            tdChangedName.appendChild(tmpCellTex3);
+                        });
+                        isProgress = false;
+                        isFinished = true;
+                        alert("작업이 끝났습니다.");
+                        resolve("complete");
 
-
-                        if (status != 'error') {
-                            finishQueue.enqueue(1);
-                            resolve("complete");
-
-                        } else {
-                            startQueue.enqueue([file, idx]);
-                            reject("not found");
-                        }
                     },
-                    processData: false,
-                    contentType: false,
+
                     // 아래 error 함수를 이용해 콘솔창으로 디버깅을 한다.
                     error: function(jqXHR, textStatus, errorThrown) {
                         // startQueue.enqueue([file, idx]);
+                        isProgress = false;
+                        alert("작업에 실패했습니다.");
                         console.log(jqXHR.responseText);
+                        reject("fail");
                     }
                 });
             });

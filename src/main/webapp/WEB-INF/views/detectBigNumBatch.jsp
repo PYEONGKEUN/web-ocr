@@ -171,36 +171,22 @@
             //     console.log(value);
             // }
 
-            // $.ajax({
-            //     type: "POST",
-            //     url: "./bigbatch",
-            //     data: formData,
-            //     processData: false,
-            //     contentType: false,
-            //     success : function(data) {
-            //         console.log(data);
-            //         if(data){
-            //             alert("Success");
-            //         }else{
-            //             alert(data);
-            //         }
-            //     },
-            //     err : function(err) {
-            //         alert(err.status);
-            //     }
-            //
-            // });
-            $.fileDownload("./bigbatch", {
-                httpMethod: "POST",
+            $.ajax({
+                type: "POST",
+                url: "./bigbatch",
                 data: formData,
-                successCallback: function(){
-                    hideLoadingDialog();
-                    window.parent.postMessage({'from': 'standby','type': 'hide'}, '*');
+                processData: false,
+                contentType: false,
+                success : function(data) {
+                    console.log(data);
+                    if(data){
+                        alert("Success");
+                    }else{
+                        alert(data);
+                    }
                 },
-                failCallback: function(){
-                    hideLoadingDialog();
-                    window.parent.postMessage({'from': 'standby','type': 'hide'}, '*');
-                    alert('엑셀 파일 생성에 실패 했습니다.\n잠시 후 다시 시도해 주시기 바랍니다. ');
+                err : function(err) {
+                    alert(err.status);
                 }
 
             });

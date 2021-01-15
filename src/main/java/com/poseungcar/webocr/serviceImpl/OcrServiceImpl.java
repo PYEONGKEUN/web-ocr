@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.gson.JsonSyntaxException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,35 +41,9 @@ public class OcrServiceImpl implements OcrService {
 	@Override
 	public boolean detectText(String id, String fileName,String filePath,String fileHash) throws FileNotFoundException, IOException{
 		// TODO Auto-generated method stub
-	log.info("["+TimeLib.getCurrTime()+"] ---detectText Start---");
 
-//		// 같은 해시값을 가진 파일을 찾음
-//		OCR findOCR =OCR.builder()
-//				.ocr_hash(fileHash)
-//				.build(); 
-//		
-//		List<OCR> findedocrs = ocrDao.select(findOCR,0,1);
-//		// 같은 해시값을 가진 파일지 존재한다면 OCR 결과를 가져와서 저장후 종료
-//		if(findedocrs.size() >= 1) {			
-//			
-//			OCR ocr = OCR.builder()
-//					.usr_id(id)
-//					.ocr_datetime(TimeLib.getCurrDateTime())
-//					.ocr_fileName(fileName)
-//					.ocr_filePath(filePath)
-//					.ocr_ocrResult(findedocrs.get(0).getOcr_ocrResult().toString())
-//					.ocr_hash(fileHash)
-//					.build();
-//
-//			/log.debug(ocr.toString());
-//
-//			ocrDao.insert(ocr);
-//		log.info("["+TimeLib.getCurrTime()+"] ---detectText End---");
-//			return true;
-//		}
 		
-		
-		log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API Start---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API Start---");
 		//GOOGLE VISION API에 서비스를 요청하기 위한  객체
 		List<AnnotateImageRequest> requests = new ArrayList<>();
 		// 이미지 전송을 위해 이미지의 바이트를 읽어와서 구글 이미지 객체에 세팅
@@ -89,7 +64,7 @@ public class OcrServiceImpl implements OcrService {
 			OCR ocr = null;
 			for (AnnotateImageResponse res : responses) {
 				if (res.hasError()) {
-					log.info("["+TimeLib.getCurrTime()+"] Error: %s\n", res.getError().getMessage());
+					//log.info("["+TimeLib.getCurrTime()+"] Error: %s\n", res.getError().getMessage());
 					ocr = OCR.builder()
 							.usr_id("default")
 							.ocr_datetime(TimeLib.getCurrDateTime())
@@ -99,7 +74,7 @@ public class OcrServiceImpl implements OcrService {
 							.ocr_hash(fileHash)
 							.build();
 				}else{
-					log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API End---");
+					//log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API End---");
 
 					Gson gson = new Gson();
 
@@ -112,7 +87,7 @@ public class OcrServiceImpl implements OcrService {
 						json = "FFFFFFFFFF";
 					}
 
-					log.info(json);
+					//log.info(json);
 
 					ocr = OCR.builder()
 							.usr_id(id)
@@ -124,15 +99,15 @@ public class OcrServiceImpl implements OcrService {
 							.build();
 
 					if(ocrDao.insert(ocr) == 1) {
-						log.info("["+TimeLib.getCurrTime()+"] "+ocr.getOcr_fileName() +" is saved as "+ocr.getOcr_filePath());
+						//log.info("["+TimeLib.getCurrTime()+"] "+ocr.getOcr_fileName() +" is saved as "+ocr.getOcr_filePath());
 					}
 				}
 			}
 		}
 		catch (Exception e){
-			log.info(e.getStackTrace());
+			//log.info(e.getStackTrace());
 		}
-		log.info("["+TimeLib.getCurrTime()+"] ---detectText End---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---detectText End---");
 		
 		// AWS 비용 절감을 위해
 		return true;
@@ -141,9 +116,9 @@ public class OcrServiceImpl implements OcrService {
 	@Override
 	public boolean detectTextBatch(List<Map<String, Object>> uploadResultList) throws FileNotFoundException, IOException {
 		// TODO Auto-generated method stub
-		log.info("["+TimeLib.getCurrTime()+"] ---detectTextBatch Start---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---detectTextBatch Start---");
 
-		log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API Start---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API Start---");
 		//GOOGLE VISION API에 서비스를 요청하기 위한  객체
 		List<AnnotateImageRequest> requests = new ArrayList<>();
 
@@ -180,18 +155,18 @@ public class OcrServiceImpl implements OcrService {
 				res = responses.get(i);
 
 				if (res.hasError()) {
-					log.info("["+TimeLib.getCurrTime()+"] Error: %s\n", res.getError().getMessage());
+					//log.info("["+TimeLib.getCurrTime()+"] Error: %s\n", res.getError().getMessage());
 					ocr = OCR.builder()
 							.usr_id("default")
 							.ocr_datetime(TimeLib.getCurrDateTime())
 							.ocr_fileName(uploadResultList.get(i).get("fileName").toString())
 							.ocr_filePath(uploadResultList.get(i).get("filePath").toString())
-							.ocr_ocrResult("FFFFFFFFFF")
+							.ocr_ocrResult("")
 							.ocr_hash(uploadResultList.get(i).get("fileHash").toString())
 							.build();
 				}
 				else{
-					//log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API End---");
+					////log.info("["+TimeLib.getCurrTime()+"] ---Google Vision API End---");
 
 					Gson gson = new Gson();
 
@@ -205,7 +180,7 @@ public class OcrServiceImpl implements OcrService {
 					}
 
 
-					log.info(json);
+					//log.info(uploadResultList.get(i).get("fileName").toString()+" : "+json.toString());
 					// ocrList에 ocr 객체들을 하나씩 추가
 					ocr = OCR.builder()
 							.usr_id("default")
@@ -219,15 +194,15 @@ public class OcrServiceImpl implements OcrService {
 				}
 			}
 			if(ocrDao.bulkInsert(ocrList) >= 1) {
-				log.info("sucess");
+				//log.info("sucess");
 			}else{
-				log.info("error");
+				//log.info("error");
 			}
 		}
 		catch (Exception e){
-			log.info(e.getStackTrace());
+			//log.info(e.getStackTrace());
 		}
-		log.info("["+TimeLib.getCurrTime()+"] ---detectTextBatch End---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---detectTextBatch End---");
 
 		return true;
 	}
@@ -238,7 +213,7 @@ public class OcrServiceImpl implements OcrService {
 
 	public String getVoucherNum(String id, String fileName,String filePath) {
 		//번호를 찾을 대상 OCR
-	log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum Start---");
+	//log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum Start---");
 		OCR findOcr = OCR.builder()
 				.usr_id(id)
 				.ocr_fileName(fileName)
@@ -251,11 +226,12 @@ public class OcrServiceImpl implements OcrService {
 		List<OCR> ocrs = ocrDao.select(findOcr);
 		
 		if(ocrs.size() == 0) {
-		log.info("OCR result is not found.");
+		//log.info("OCR result is not found.");
 			return null;
 		}		
 		//하나만 고르기때문에 가장 첫번째
-		String json = ocrs.get(0).getOcr_ocrResult();		
+		String json = ocrs.get(0).getOcr_ocrResult();
+
 
 		Gson gson = new Gson();	
 		//json 형식의 String에서 List<EntityAnnotation>객체를 생성
@@ -275,9 +251,9 @@ public class OcrServiceImpl implements OcrService {
 				if(!(thisY >= minY && thisY <= MaxY)) isInRect = false;
 			}
 			if(isInRect) {
-				//				log.info("--------------"+n++);
-				//				log.info(annotation.getDescription());
-				//				log.info(annotation.getBoundingPoly().toString());
+				//				//log.info("--------------"+n++);
+				//				//log.info(annotation.getDescription());
+				//				//log.info(annotation.getBoundingPoly().toString());
 				detectedVoucherNum+=annotation.getDescription();
 			}
 		}
@@ -285,13 +261,13 @@ public class OcrServiceImpl implements OcrService {
 		detectedVoucherNum = detectedVoucherNum.replaceAll(" |", "");
 
 
-		log.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
-		log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");
+		//log.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
+		//log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");
 		return detectedVoucherNum;
 	}
 	
 	public String getVoucherNumByRegEx(String id, String fileName,String filePath) {
-		log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNumByRegEx Start---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNumByRegEx Start---");
 		//번호를 찾을 대상 OCR
 		OCR findOcr = OCR.builder()
 				.usr_id(id)
@@ -305,13 +281,13 @@ public class OcrServiceImpl implements OcrService {
 		List<OCR> ocrs = ocrDao.select(findOcr);
 		
 		if(ocrs.size() == 0) {
-		log.info("OCR result is not found.");
+		//log.info("OCR result is not found.");
 			return null;
 		}
 		
 		//하나만 고르기때문에 가장 첫번째
-		String json = ocrs.get(0).getOcr_ocrResult();		
-		
+		String json = ocrs.get(0).getOcr_ocrResult();
+
 
 		Gson gson = new Gson();	
 		//json 형식의 String에서 List<EntityAnnotation>객체를 생성
@@ -323,7 +299,7 @@ public class OcrServiceImpl implements OcrService {
 		// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
 		allTxt = allTxt.replaceAll(" ", "");
 		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
-		log.info(allTxt);
+		//log.info(allTxt);
 
 		Pattern  regExPattern = Pattern.compile(StaticValues.REGEX_PATTERN_VOUCHER_NUM);
 		Matcher m = regExPattern.matcher(allTxt);
@@ -337,61 +313,75 @@ public class OcrServiceImpl implements OcrService {
         	//못찾는다면 위치기반으로 탐색
         	detectedVoucherNum = getVoucherNum(id,fileName,filePath);
         }
-	log.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
-	log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");
+	//log.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
+	//log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");
 		return detectedVoucherNum;
 	}
 
 	@Override
 	public String getBigVoucherNumByRegEx(String id, String fileName, String filePath) {
-		log.info("["+TimeLib.getCurrTime()+"] ---getBigVoucherNumByRegEx Start---");
+		//log.info("["+TimeLib.getCurrTime()+"] ---getBigVoucherNumByRegEx Start---");
 		//번호를 찾을 대상 OCR
-		OCR findOcr = OCR.builder()
-				.usr_id(id)
-				.ocr_fileName(fileName)
-				.ocr_filePath(filePath)
-				.build();
+		try{
+			OCR findOcr = OCR.builder()
+					.usr_id(id)
+					.ocr_fileName(fileName)
+					.ocr_filePath(filePath)
+					.build();
 
-		//결과물을 담을 변수
-		String detectedVoucherNum = "";
+			//결과물을 담을 변수
+			String detectedVoucherNum = "";
 
-		List<OCR> ocrs = ocrDao.select(findOcr);
+			List<OCR> ocrs = ocrDao.select(findOcr);
 
-		if(ocrs.size() == 0) {
-		log.info("OCR result is not found.");
-			return null;
+			if(ocrs.size() == 0) {
+				//log.info("OCR result is not found.");
+				return null;
+			}
+
+			//하나만 고르기때문에 가장 첫번째
+			String json = ocrs.get(0).getOcr_ocrResult();
+
+			//
+			//(json);
+			if(json == "FFFFFFFFFF"){
+				return json;
+			}
+
+			Gson gson = new Gson();
+			//json 형식의 String에서 List<EntityAnnotation>객체를 생성
+			gson.fromJson(json, new TypeToken<List<EntityAnnotation>>(){}.getType());
+			List<EntityAnnotation> annotations = gson.fromJson(json, new TypeToken<List<EntityAnnotation>>(){}.getType());
+
+			//해당 엔티티어노테이션에
+			String allTxt = annotations.get(0).getDescription();
+
+			// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
+			allTxt = allTxt.replaceAll(" ", "");
+			allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
+			//log.info(allTxt);
+
+			Pattern  regExPattern = Pattern.compile(StaticValues.REGEX_PATTERN_BIG_VOUCHER_NUM);
+			Matcher m = regExPattern.matcher(allTxt);
+			if(m.find())
+			{
+				StringBuffer origin = new StringBuffer(m.group());
+				detectedVoucherNum = origin.insert(5,"_").toString();
+			}
+			else
+			{
+				detectedVoucherNum = "FFFFFFFFFF";
+			}
+			//log.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
+			return detectedVoucherNum;
+		}catch (JsonSyntaxException e){
+			//log.error("error",e);
+			return "FFFFFFFFFF";
+		}catch (Exception e){
+			//log.error("error",e);
+			return "FFFFFFFFFF";
 		}
 
-		//하나만 고르기때문에 가장 첫번째
-		String json = ocrs.get(0).getOcr_ocrResult();
-
-		Gson gson = new Gson();
-		//json 형식의 String에서 List<EntityAnnotation>객체를 생성
-		List<EntityAnnotation> annotations = gson.fromJson(json, new TypeToken<List<EntityAnnotation>>(){}.getType());
-
-		//해당 엔티티어노테이션에
-		String allTxt = annotations.get(0).getDescription();
-
-		// 공백 및 줄바꿈 제거후 정규식으로 증표번호 탐색
-		allTxt = allTxt.replaceAll(" ", "");
-		allTxt = allTxt.replaceAll("(\r\n|\r|\n|\n\r)", "");
-		log.info(allTxt);
-
-		Pattern  regExPattern = Pattern.compile(StaticValues.REGEX_PATTERN_BIG_VOUCHER_NUM);
-		Matcher m = regExPattern.matcher(allTxt);
-		if(m.find())
-		{
-			StringBuffer origin = new StringBuffer(m.group());
-			detectedVoucherNum = origin.insert(5,"_").toString();
-		}
-		else
-		{
-			//못찾는다면 위치기반으로 탐색
-			detectedVoucherNum = "FFFFF_FFFFF";
-		}
-		log.info("["+TimeLib.getCurrTime()+"] detectedVoucherNum is "+detectedVoucherNum);
-		log.info("["+TimeLib.getCurrTime()+"] ---getVoucherNum End---");
-		return detectedVoucherNum;
 	}
 
 

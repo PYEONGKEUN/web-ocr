@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import lombok.extern.log4j.Log4j2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,12 +30,10 @@ import com.poseungcar.webocr.util.FileHash;
 import com.poseungcar.webocr.util.ImageTools;
 import com.poseungcar.webocr.util.TimeLib;
 
-
+@Log4j2
 @Service
 @PropertySource({"classpath:profiles/${spring.profiles.active}/application.properties"})
 public class FileServiceImpl implements FileService {
-
-	private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
 
 	@Value("${imgs.location}")
@@ -59,11 +58,11 @@ public class FileServiceImpl implements FileService {
 
 		
 		Map<String, Object> result = new HashMap<String, Object>();
-		logger.info("["+TimeLib.getCurrTime()+"] File uploaded loading.");
+		//log.info("["+TimeLib.getCurrTime()+"] File uploaded loading.");
 
 
 		//REAL_PATH : /opt/webocr/imgs
-		logger.info("REAL_PATH : " + uploadsLocation);
+		//log.info("REAL_PATH : " + uploadsLocation);
 		String userId="default";
 //		if(activeProfile.equals("dev")) {
 //			userId = "test";
@@ -76,11 +75,11 @@ public class FileServiceImpl implements FileService {
 		// 업로드 폴더 생성
 		File dir = new File(uploadsLocation,userId);		
 		if(dir.exists()) {
-			logger.info(dir.getPath()+ " is Exist");
+			//log.info(dir.getPath()+ " is Exist");
 		}else {
 			// 	폴더 생성
 			dir.mkdirs();		
-			logger.info(dir.getPath()+" is not Exist so create dir");
+			//log.info(dir.getPath()+" is not Exist so create dir");
 		}
 
 		// Save mediaFile on system
@@ -97,7 +96,7 @@ public class FileServiceImpl implements FileService {
 			
 			model.addAttribute("msg", "이미지 업로드 완료");
 
-			logger.info("["+TimeLib.getCurrTime()+"] File uploaded successfully.");
+			//log.info("["+TimeLib.getCurrTime()+"] File uploaded successfully.");
 
 
 //			//사이트의 순수한 주소
@@ -106,7 +105,7 @@ public class FileServiceImpl implements FileService {
 //			String getContextPath = request.getContextPath();
 //			//전체 URL
 //			String fileURL = host + getContextPath+uploadsUriPath +"/"+userId+"/"+file.getOriginalFilename();
-//			logger.info("return : "+fileURL);
+//			//log.info("return : "+fileURL);
 			   
 
 			result.put("fileName", file.getOriginalFilename());
@@ -116,7 +115,7 @@ public class FileServiceImpl implements FileService {
 			
 		} else {
 			model.addAttribute("msg", "이미지 파일을 선택해주세요.");
-			logger.info("이미지 파일을 선택해주세요");
+			//log.info("이미지 파일을 선택해주세요");
 			return null;
 		}
 	}

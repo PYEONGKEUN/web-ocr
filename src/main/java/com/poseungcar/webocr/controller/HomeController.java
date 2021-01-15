@@ -102,10 +102,9 @@ public class HomeController {
 		for (MultipartFile file: fileList ) {
 			uploadResultList.add(fileService.imgUpload(file,model,session,request,response));
 		}
-		log.info(uploadResultList.toString());
+		//log.info(uploadResultList.toString());
 
-		Workbook wb = new HSSFWorkbook();
-		Sheet sheet = wb.createSheet("sheet1");
+
 		//-- 구글 API 처리 및 파일 업로드
 		for (Map<String, Object> uploadResultItem: uploadResultList) {
 			ocrService.detectText(
@@ -124,7 +123,7 @@ public class HomeController {
 		}
 		//--- excel 파일
 
-		log.info(bigNumList.toString());
+		//log.info(bigNumList.toString());
 
 
 
@@ -139,8 +138,6 @@ public class HomeController {
 			MultipartHttpServletRequest multiFiles,
 			HttpServletResponse response) throws Exception{
 
-		OutputStream os = response.getOutputStream();
-		SXSSFWorkbook wb = new SXSSFWorkbook(100);
 		try{
 
 			//MultipartFile는 자바스크립트로 File객체와 Bloc 객체를 받을수 있다.
@@ -150,13 +147,22 @@ public class HomeController {
 			for (MultipartFile file: fileList ) {
 				uploadResultList.add(fileService.imgUpload(file,model,session,request,response));
 			}
-			log.info("uploadResultList : "+uploadResultList.toString());
+			////log.info("uploadResultList : "+uploadResultList.toString());
 
 
 			//-- 구글 API 처리 및 파일 업로드
-			if(ocrService.detectTextBatch(uploadResultList) == false){
-				throw new Exception("detectTextBatch failed");
+			List<Map<String, Object>> tmpUploadResultList= new ArrayList<Map<String,Object>>();
+			int size = 0;
+			for (Map<String, Object>uploadResultItem: uploadResultList) {
+				size++;
+				tmpUploadResultList.add(uploadResultItem);
+				if(size % 10 == 0){
+					ocrService.detectTextBatch(tmpUploadResultList);
+					tmpUploadResultList.clear();
+				}
 			}
+			ocrService.detectTextBatch(tmpUploadResultList);
+
 
 
 			//--- getBigNUmberBatch AND create
@@ -167,19 +173,19 @@ public class HomeController {
 			String tmpBigNum = null;
 
 
-			log.info("uploadResultListSize : "+uploadResultListSize);
+			//log.info("uploadResultListSize : "+uploadResultListSize);
 
 			// -- 헤더 이후 두번째 행부터 추가 (실질적인 데이터)
 			for (int i = 0; i < uploadResultListSize; i++) {
 				uploadResultItem = uploadResultList.get(i);
-				log.info("uploadResultItem : "+uploadResultItem.toString());
+				//log.info("uploadResultItem : "+uploadResultItem.toString());
 				tmpBigNum = ocrService.getBigVoucherNumByRegEx(
 						"default",
 						uploadResultItem.get("fileName").toString(),
 						uploadResultItem.get("filePath").toString());
 
-				if(tmpBigNum == null) tmpBigNum = "FFFFF_FFFFF";
-				log.info(tmpBigNum);
+				if(tmpBigNum == null || tmpBigNum == "FFFFFFFFFF") tmpBigNum = "FFFFF_FFFFF";
+				log.info(i+" : "+tmpBigNum);
 				// 파일 이름과 ext 구하기
 				bigNumList.add(tmpBigNum);
 			}
@@ -194,7 +200,7 @@ public class HomeController {
 			}
 
 		}catch(Exception e) {
-			log.error(e.getMessage());
+			log.error("error", e);
 			return "";
 		}
 	}
